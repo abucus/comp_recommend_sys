@@ -9,8 +9,8 @@ output_pure_matrix = op.join(base_file_path, 'pure_matrix.csv')
 output_full_matrix = op.join(base_file_path, 'full_matrix.csv')
 output_col_map = op.join(base_file_path, 'column_map.csv')
 id_column = 0
-time_column = 3
-event_type_column = 7
+time_column = 1
+event_type_column = 14
 
 # read in all data and organize in a map like
 # {'id1':[(time1,event_type1),(time2,event_type2)]} the event sequence is ordered by date-time
@@ -25,12 +25,12 @@ with open(source_path) as cf:
             table[cid]=[]
         table[cid].append((datetime.strptime(row[time_column],date_format),row[event_type_column]))
         if(row[event_type_column] not in event_types):
-            event_types.append(row[7])
+            event_types.append(row[event_type_column])
     
     for v in table.itervalues():
         v.sort(key = lambda l:l[0])
 
-
+print "event_types:#",len(event_types),"\n",event_types
 # genearte the mapping between the column number and column name
 # key: event_type_1+@+event_type_2
 # value: column number
@@ -58,6 +58,7 @@ for k,v in table.iteritems():
     for i in range(0,len(v)):
         for j in range(i+1, len(v)):
             if(v[i][1] == v[j][1]):
+                m[r,col_num_name_map[v[i][1]+'@'+v[j][1]]] = 0 
                 continue
             else:
                 m[r,col_num_name_map[v[i][1]+'@'+v[j][1]]] = (v[j][0] - v[i][0]).total_seconds()
