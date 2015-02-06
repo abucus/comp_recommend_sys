@@ -3,19 +3,20 @@ import numpy as np
 import os.path as op
 from datetime import datetime
 
-base_file_path = '.'
-source_path = op.join(base_file_path,'a.csv')
+base_file_path = 'e:\\'
+source_path = op.join(base_file_path,'simpleA2.csv')
 output_pure_matrix = op.join(base_file_path, 'pure_matrix.csv')
 output_full_matrix = op.join(base_file_path, 'full_matrix.csv')
 output_col_map = op.join(base_file_path, 'column_map.csv')
 id_column = 0
 time_column = 1
-event_type_column = 14
+event_type_column = 3
 
 # read in all data and organize in a map like
 # {'id1':[(time1,event_type1),(time2,event_type2)]} the event sequence is ordered by date-time
 with open(source_path) as cf:
     reader = csv.reader(cf, delimiter=',')
+    reader.next()
     table = {}
     event_types = []
     date_format = '%Y-%m-%d %H:%M:%S.0%f'
@@ -76,7 +77,5 @@ with open(output_full_matrix,'w') as out_file:
         for row in reader:
             writer.writerow([row_names[row_num]]+row)
             row_num += 1
-
-
-# output column number and name mapping for pure matrix
-
+            
+            
