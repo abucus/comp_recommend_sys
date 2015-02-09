@@ -15,10 +15,11 @@ class Test(unittest.TestCase):
         row_num = 25
         col_num = 125
         r = 5
-        self.V = np.random.random_sample((row_num, col_num))
-        self.init_W = np.random.random_sample((row_num, r))
-        self.init_H = np.random.random_sample((r, col_num))
-        np.savetxt("my_nmf_V.txt", self.V)
+        #self.V = np.random.random_sample((row_num, col_num))
+        self.V = np.loadtxt("nmf_V.txt")
+        self.init_W = np.loadtxt("nmf_init_W.txt")#np.random.random_sample((row_num, r))
+        self.init_H = np.loadtxt("nmf_init_H.txt")#np.random.random_sample((r, col_num))
+        #np.savetxt("my_nmf_V.txt", self.V)
 
 
     def tearDown(self):

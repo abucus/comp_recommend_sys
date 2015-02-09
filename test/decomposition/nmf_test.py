@@ -28,6 +28,8 @@ class Test(unittest.TestCase):
 
     def testLibNMF(self):
         (W, H) = nmf(self.V, self.init_W, self.init_H, 10e-3, 10000, 5000)
+        np.savetxt("nmf_init_W.txt", self.init_W)
+        np.savetxt("nmf_init_H.txt", self.init_H)
         np.savetxt("nmf_W.txt", W)
         np.savetxt("nmf_H.txt", H)
 
