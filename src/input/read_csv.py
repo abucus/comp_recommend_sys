@@ -3,11 +3,12 @@ import numpy as np
 import os.path as op
 from datetime import datetime
 
-base_file_path = 'e:\\'
-source_path = op.join(base_file_path, 'simpleA2.csv')
+base_file_path = op.join("..","..","output","data")
+source_path = op.join(base_file_path, "original",'simpleA2.csv')
 output_pure_matrix = op.join(base_file_path, 'pure_matrix.csv')
 output_full_matrix = op.join(base_file_path, 'full_matrix.csv')
 output_col_map = op.join(base_file_path, 'column_map.csv')
+output_stat_path = op.join(base_file_path, "stat.txt")
 id_column = 0
 time_column = 1
 event_type_column = 3
@@ -30,8 +31,24 @@ with open(source_path) as cf:
     
     for v in table.itervalues():
         v.sort(key=lambda l:l[0])
-
+        
 print "event_types:#", len(event_types), "\n", event_types
+
+# output the stat info
+total_days_interval = 0
+interval_count = 0
+for v in table.itervalues():
+    for i in range(len(v) - 1):
+        if v[i][1] == v[i+1][1]:
+            interval_count += 1
+            total_days_interval += (v[i+1][0] - v[i][0]).total_seconds()/3600.0/24.0
+with open(output_stat_path,"w") as sf:
+    writer = csv.writer(sf, delimiter=':')
+    writer.writerow(['Total interval days', total_days_interval])
+    writer.writerow(['Intervals count:', interval_count])
+    writer.writerow(['Average intervals', total_days_interval/interval_count])
+    
+
 # genearte the mapping between the column number and column name
 # key: event_type_1+@+event_type_2
 # value: column number
