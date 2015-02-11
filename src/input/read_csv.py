@@ -1,6 +1,7 @@
 import csv
 import numpy as np
 import os.path as op
+import json
 from datetime import datetime
 
 base_file_path = op.join("..","..","output","data")
@@ -42,15 +43,15 @@ for v in table.itervalues():
         if v[i][1] == v[i+1][1]:
             interval_count += 1
             total_days_interval += (v[i+1][0] - v[i][0]).total_seconds()/3600.0/24.0
-with open(output_stat_path,"w") as sf:
-    writer = csv.writer(sf, delimiter=':')
-    writer.writerow(['Total interval days', total_days_interval])
-    writer.writerow(['Intervals count:', interval_count])
-    writer.writerow(['Average intervals', total_days_interval/interval_count])
-    
+delta = total_days_interval/interval_count
+json.dump({
+           "total_days_interval":total_days_interval, 
+           "interval_count":interval_count, 
+           "delta":delta
+           },open(output_stat_path,"w"))    
 
 # genearte the mapping between the column number and column name
-# key: event_type_1+@+event_type_2
+# key: event_type_1+'@'+event_type_2
 # value: column number
 event_types.sort()
 col_names = []
@@ -68,19 +69,20 @@ with open(output_col_map, 'w') as cmf:
             col_num += 1
 
 # generate pure matrix and write to csv
-m = np.full((len(table.keys()), len(event_types) ** 2), -1)
+m = np.full((len(table.keys()), len(event_types) ** 2), 0)
 row_names = []
 r = 0
 for k, v in table.iteritems():
     row_names.append(str(k))
     for i in range(0, len(v)):
+        d = 0.
         for j in range(i + 1, len(v)):
             if(v[i][1] == v[j][1]):
-                m[r, col_num_name_map[v[i][1] + '@' + v[j][1]]] = 0 
+                m[r, col_num_name_map[v[i][1] + '@' + v[j][1]]] = 1
                 continue
             else:
-                m[r, col_num_name_map[v[i][1] + '@' + v[j][1]]] = (v[j][0] - v[i][0]).total_seconds()
-#                print "put ",(v[j][0] - v[i][0]).total_seconds()," in cell ",r," ",col_num_name_map[v[i][1]+'@'+v[j][1]]
+                d += np.exp(-(v[j][0] - v[j-1][0]).total_seconds()/3600.0/24.0/delta)
+                m[r, col_num_name_map[v[i][1] + '@' + v[j][1]]] = d
     r += 1        
 np.savetxt(output_pure_matrix, m, delimiter=",")
 
