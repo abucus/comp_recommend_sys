@@ -53,60 +53,56 @@ class NMF3(object):
         else:
             X_old = H
         grad_f_old = self.__grad_f(W, H)
-        alpha = .1
-        beta=.1
+        alpha = 1.
+        beta=.5
         X_new = self.__p(X_old - alpha * grad_f_old)
         
         iter_count, max_iter = 0, 15
         
-        if self.__decrease_condition(W, H, X_new, grad_f_old):
+        if self.__decrease_condition(W, H, X_new):
             # increase step loop
             while True:
                 # logging.debug("increasing step, previous alpha is {alpha}".format(alpha=alpha))
                 alpha = alpha / beta
                 X_old = X_new
-                grad_f_old = self.__grad_f(v, M, x_old, nni)
-                x_new = self.__p(x_old - alpha * grad_f_old)
-                need_continue = self.__decrease_condition(v, M, x_old, x_new, grad_f_old, nni)
+                grad_f_old = self.__grad_f(*((X_old,H) if self.computing_W else (W, X_old)))
+                x_new = self.__p(X_old - alpha * grad_f_old)
+                need_continue = self.__decrease_condition(*((X_old, H, X_new) if self.computing_W else (W, X_old, X_new)))
                 logging.info("increasing loop alpha:{0},\nx_new:{1}\n,grad_f_old{2}\ncondition:{3}".format(alpha, x_new, grad_f_old, need_continue))
                 iter_count += 1
                 if iter_count == max_iter or not need_continue:
-                    logging.info("log x_old before break:{0}".format(x_old))
+                    logging.info("log x_old before break:{0}".format(X_old))
                     break
-            logging.info("the latest x is {0}, the latest alpha is {1}\n---------------------\n ".format(x_old, alpha*beta))
-            return x_old
+            logging.info("the latest x is {0}, the latest alpha is {1}\n---------------------\n ".format(X_old, alpha*beta))
+            return X_old
         else:
             # decrease step loop
             while True:
                 # logging.debug("decreasing step, previous alpha is {alpha}".format(alpha=alpha))
                 alpha = alpha * beta
-                logging.info("---------------------\n x_old before update:{0}".format(x_old))
-                x_old = x_new
-                grad_f_old = self.__grad_f(v, M, x_old, nni)
-                x_new = self.__p(x_old - alpha * grad_f_old)
-                need_continue = self.__decrease_condition(v, M, x_old, x_new, grad_f_old, nni)
+                #logging.info("---------------------\n x_old before update:{0}".format(x_old))
+                X_old = X_new
+                grad_f_old = self.__grad_f(*((X_old,H) if self.computing_W else (W, X_old)))
+                x_new = self.__p(X_old - alpha * grad_f_old)
+                need_continue = self.__decrease_condition(*((X_old, H, X_new) if self.computing_W else (W, X_old, X_new)))
                 logging.info("decreasing loop alpha:{0},\nx_new:{1}\n,grad_f_old{2}\ncondition:{3}".format(alpha, x_new, grad_f_old, need_continue))
                 iter_count += 1
                 if iter_count == max_iter or need_continue:
-                    logging.info("log x_old before break:{0}".format(x_old))
+                    logging.info("log x_old before break:{0}".format(X_old))
                     break
             logging.info("the latest x is {0}, the latest alpha is {1}\n---------------------\n".format(x_new, alpha))
-            return x_new
+            return X_new
        
        
         
-    def __decrease_condition(self, W, H, X_new, grad_f_old):
-        sigma = .01 
+    def __decrease_condition(self, W, H, X_new):
         f_x_old = self.__f(W, H)
         if self.computing_W:
             f_x_new = self.__f(X_new, H)
         else:
             f_x_new = self.__f(W, X_new)
         
-        condition_value = f_x_new - f_x_old - sigma * np.dot(grad_f_old, x_new - x_old)
-        # logging.info(" xk={0} \n xk+1={1}".format(x_old, x_new))
-        # logging.info(" f_xk={0} \n f_xk+1={1} \n grad_f_xk={2} \n decrease condition value:{3}".format(f_x_old, f_x_new, grad_f_old, condition_value))       
-        return condition_value <= 0
+        return f_x_new < f_x_old
         
     def __p(self, x):        
         return np.where(x < 0, 0, x)

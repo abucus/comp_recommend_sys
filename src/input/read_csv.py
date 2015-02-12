@@ -4,14 +4,16 @@ import os.path as op
 import json
 from datetime import datetime
 
-# read in all data and organize in a map like
-# {'id1':[(time1,event_type1),(time2,event_type2)]} the event sequence is ordered by date-time
-def read_in(base_file_path = op.join("..","..","output","data")):
+
+def read_in(source_path = op.join("..","..","output","data", "original",'simpleA2.csv')):
+    '''
+    Read in all data and organize in a map like
+    {'id1':[(time1,event_type1),(time2,event_type2)]} the event sequence is ordered by date-time
+    '''
     id_column = 0
     time_column = 1
     company_column = 2
     event_type_column = 3
-    source_path = op.join(base_file_path, "original",'simpleA2.csv')
     with open(source_path) as cf:
         reader = csv.reader(cf, delimiter=',')
         reader.next()
