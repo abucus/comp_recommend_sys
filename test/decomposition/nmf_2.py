@@ -14,7 +14,7 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.base_path = base_path = op.join("..","..","output", "nmf2")
+        self.input_path = base_path = op.join("..","..","output", "nmf2")
         if not op.exists(base_path):
             os.makedirs(base_path)
         self.log_path = op.join(base_path, "nmf2.log")
@@ -38,8 +38,8 @@ class Test(unittest.TestCase):
     def test_my_nmf(self):
         my_nmf = NMF2()
         (W, H) = my_nmf.factorize(self.V, self.init_W, self.init_H)
-        np.savetxt(op.join(self.base_path, "my_nmf_2_W.txt"), W)
-        np.savetxt(op.join(self.base_path, "my_nmf_2_H.txt"), H)
+        np.savetxt(op.join(self.input_path, "my_nmf_2_W.txt"), W)
+        np.savetxt(op.join(self.input_path, "my_nmf_2_H.txt"), H)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
