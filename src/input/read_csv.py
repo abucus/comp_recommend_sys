@@ -85,15 +85,13 @@ def generate_file(data, base_file_path = op.join("..","..","output","data")):
     for cid, record in table.iteritems():
         row_names.append(str(cid))
         v = record['events']
-        for i in range(0, len(v)):
-            d = 0.
-            for j in range(i + 1, len(v)):
+        v_len = len(v)
+        for i in range(0, v_len):
+            for j in range(i + 1, v_len):
                 if(v[i][1] == v[j][1]):
-                    m[r, col_num_name_map[v[i][1] + '@' + v[j][1]]] = 1
-                    continue
+                    m[r, col_num_name_map[v[i][1] + '@' + v[j][1]]] = 1./v_len
                 else:
-                    d += np.exp(-(v[j][0] - v[j-1][0]).total_seconds()/3600.0/24.0/delta)
-                    m[r, col_num_name_map[v[i][1] + '@' + v[j][1]]] = d
+                    m[r, col_num_name_map[v[i][1] + '@' + v[j][1]]] = np.exp(-(v[j][0] - v[j-1][0]).total_seconds()/3600.0/24.0/delta)/v_len
         r += 1        
     np.savetxt(output_pure_matrix, m, delimiter=",")
     

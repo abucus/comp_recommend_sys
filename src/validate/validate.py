@@ -35,24 +35,32 @@ class Validator(object):
             output_config_file = open(output_config_path, "r")
             output_config = json.load(output_config_file)
             self.output_count = output_config['count']
+            
+        self.r = None
+        self.training_V = np.loadtxt(op.join(self.input_path, "training","pure_matrix.csv"), delimiter=",")
+        self.C = np.loadtxt(op.join(self.input_path, "training","company_matrix"))
+        
         print "****** validator init done ******" \
         "\noutput_count:", self.output_count, \
         "\ninput_path:",self.input_path
     
     def validate(self, r, _lambda):
-        training_V = np.loadtxt(op.join(self.input_path, "training","pure_matrix.csv"), delimiter=",")
-        C = np.loadtxt(op.join(self.input_path, "training","company_matrix"))
-        initW = np.random.random_sample((training_V.shape[0], r))
-        initH = np.random.random_sample((r, training_V.shape[1]))
+        
+        if not self.r or self.r != r:
+            self.r = r
+            initW = self.initW = np.random.random_sample((self.training_V.shape[0], r))
+            initH = self.initH = np.random.random_sample((r, self.training_V.shape[1]))
+        else:
+            initW = self.initW
+            initH = self.initH
+            
         print "****** init W,H done ******" \
-        "\nV shape:", training_V.shape,\
+        "\nV shape:", self.training_V.shape,\
         "\ninit W shape:", initW.shape,\
         "\ninit H shape:", initH.shape
         
-        (W,H) = self.nmf.factorize(training_V, C, initW, initH)
-        del training_V
+        (W,H) = self.nmf.factorize(self.training_V, self.C, initW, initH, _lambda)
         
-        test_V = np.loadtxt(op.join(self.input_path, "test","pure_matrix.csv"))
         WH = np.dot(W,H)
         
         output_path = op.join(self.output_path, str(self.output_count))
@@ -61,14 +69,14 @@ class Validator(object):
         np.savetxt(op.join(output_path,"W.csv"), W)
         np.savetxt(op.join(output_path,"H.csv"), H)
         np.savetxt(op.join(output_path, "WH.txt"), WH)
-        np.savetxt(op.join(output_path, "error.txt"), norm(WH-test_V))
+        del W,H
         
-        del W,H,WH,test_V
+        test_V = np.loadtxt(op.join(self.input_path, "test","pure_matrix.csv"), delimiter=",")
+        with open(op.join(output_path, "result.txt"), 'w') as f:
+            json.dump({'norm': norm(WH-test_V), 'r':r, 'lambda':_lambda}, f)
         
+        del WH,test_V
+        
+        self.output_count += 1
         with open(op.join(self.output_path, "output_config.txt"), 'w') as f:
-            json.dump({'count':self.output_count+1}, f)
-        
-        
-        
-        
-        
+            json.dump({'count':self.output_count}, f)
