@@ -39,7 +39,9 @@ class Validator(object):
         self.r = None
         self.training_V = np.loadtxt(op.join(self.input_path, "training","pure_matrix.csv"), delimiter=",")
         self.C = np.loadtxt(op.join(self.input_path, "training","company_matrix"))
-        
+        self.test_V = np.loadtxt(op.join(self.input_path, "test","pure_matrix.csv"), delimiter=",")
+        self.I = np.where(self.test_V>0, 1, 0)
+        self.non_zero_count = self.I.sum()
         print "****** validator init done ******" \
         "\noutput_count:", self.output_count, \
         "\ninput_path:",self.input_path
@@ -71,11 +73,12 @@ class Validator(object):
         np.savetxt(op.join(output_path, "WH.txt"), WH)
         del W,H
         
-        test_V = np.loadtxt(op.join(self.input_path, "test","pure_matrix.csv"), delimiter=",")
-        with open(op.join(output_path, "result.txt"), 'w') as f:
-            json.dump({'norm': norm(WH-test_V), 'r':r, 'lambda':_lambda}, f)
         
-        del WH,test_V
+        diff = (WH-self.test_V)*self.I
+        with open(op.join(output_path, "result.txt"), 'w') as f:
+            json.dump({'rmse': np.sqrt(norm(diff)**2/self.non_zero_count), 'mae': norm(diff,1)/self.non_zero_count, 'r':r, 'lambda':_lambda}, f)
+        
+        del WH
         
         self.output_count += 1
         with open(op.join(self.output_path, "output_config.txt"), 'w') as f:
