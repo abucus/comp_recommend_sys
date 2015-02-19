@@ -7,6 +7,7 @@ import os.path as op
 import numpy as np
 import json,csv
 from numpy.linalg import norm
+from src.input.read_csv import read_in
 
 def recalerror():
     path = op.join("..", "output","data","validate")
@@ -33,9 +34,14 @@ def recalerror():
             writer.writerow(["r", "RMSE", "MAE"])
             writer.writerows(results)
 
-def cal_rmse():
-    path = op.join("..", "output","data","validate")
-    V = np.loadtxt(op.join(path, "training", "pure_matrix.csv"),delimiter=",") 
-    
-    
-recalerror()    
+def cal_events_length():
+    data = read_in(source_path=op.join("..", "output", "data", "original", 'simpleA2.csv'))
+    events = []
+        
+    for v in data['table'].values():
+        events.append(len(v['events']))
+        
+    print "mean:",np.mean(events)
+    print "max:",np.max(events)
+    print "min:",np.min(events)
+cal_events_length()
