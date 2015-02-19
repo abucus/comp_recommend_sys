@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 
 
-def read_in(source_path = op.join("..","..","output","data", "original",'simpleA2.csv')):
+def read_in(source_path=op.join("..", "..", "output", "data", "original", 'simpleA2.csv')):
     '''
     Read in all data and organize in a map like
     {'id1':[(time1,event_type1),(time2,event_type2)]} the event sequence is ordered by date-time
@@ -35,7 +35,7 @@ def read_in(source_path = op.join("..","..","output","data", "original",'simpleA
     print "event_types:#", len(event_types), "\n", event_types
     return {'event_types':event_types, 'table':table}
 
-def generate_file(data, base_file_path = op.join("..","..","output","data")):
+def generate_file(data, base_file_path=op.join("..", "..", "output", "data")):
     table = data['table']
     event_types = data['event_types']
     
@@ -50,15 +50,15 @@ def generate_file(data, base_file_path = op.join("..","..","output","data")):
     for c in table.itervalues():
         v = c['events']
         for i in range(len(v) - 1):
-            if v[i][1] == v[i+1][1]:
+            if v[i][1] == v[i + 1][1]:
                 interval_count += 1
-                total_days_interval += (v[i+1][0] - v[i][0]).total_seconds()/3600.0/24.0
-    delta = total_days_interval/interval_count
+                total_days_interval += (v[i + 1][0] - v[i][0]).total_seconds() / 3600.0 / 24.0
+    delta = total_days_interval / interval_count
     json.dump({
-               "total_days_interval":total_days_interval, 
-               "interval_count":interval_count, 
+               "total_days_interval":total_days_interval,
+               "interval_count":interval_count,
                "delta":delta
-               },open(output_stat_path,"w"))    
+               }, open(output_stat_path, "w"))    
     
     # genearte the mapping between the column number and column name
     # key: event_type_1+'@'+event_type_2
@@ -89,9 +89,9 @@ def generate_file(data, base_file_path = op.join("..","..","output","data")):
         for i in range(0, v_len):
             for j in range(i + 1, v_len):
                 if(v[i][1] == v[j][1]):
-                    m[r, col_num_name_map[v[i][1] + '@' + v[j][1]]] = 1./v_len
+                    m[r, col_num_name_map[v[i][1] + '@' + v[j][1]]] = 1. / v_len
                 else:
-                    m[r, col_num_name_map[v[i][1] + '@' + v[j][1]]] = np.exp(-(v[j][0] - v[j-1][0]).total_seconds()/3600.0/24.0/delta)/v_len
+                    m[r, col_num_name_map[v[i][1] + '@' + v[j][1]]] = np.exp(-(v[j][0] - v[j - 1][0]).total_seconds() / 3600.0 / 24.0 / delta) / v_len
         r += 1        
     np.savetxt(output_pure_matrix, m, delimiter=",")
     
@@ -107,11 +107,11 @@ def generate_file(data, base_file_path = op.join("..","..","output","data")):
                 row_num += 1
                 
     # generate company matrix
-    company_matrix = np.zeros((len(table), len(table)))
+    company_matrix = np.zeros((len(table), len(table)))  
     cur_row = 0
-    for k,v in table.iteritems():
+    for k, v in table.iteritems():
         cur_col = 0
-        for k2,v2 in table.iteritems():
+        for k2, v2 in table.iteritems():
             if v['company'] == v2['company']:
                 company_matrix[cur_row, cur_col] = 1
             else:

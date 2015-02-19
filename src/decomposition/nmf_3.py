@@ -125,17 +125,6 @@ class NMF3(object):
                 elif iter_count == max_iter:
                     print " keep ","W" if self.computing_W else "H","the same.","\n*** exit step decreasing loop ***"
                     return X_old
-       
-       
-        
-    def __decrease_condition(self, W, H, X_new):
-        f_x_old = self.__f(W, H)
-        if self.computing_W:
-            f_x_new = self.__f(X_new, H)
-        else:
-            f_x_new = self.__f(W, X_new)
-        
-        return f_x_new < f_x_old
         
     def __p(self, x):        
         return np.where(x < 0, 0, x)

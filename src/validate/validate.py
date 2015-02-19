@@ -23,8 +23,6 @@ class Validator(object):
         self.input_path = input_path
         self.output_path = output_path
         
-        if not op.exists(self.input_path):
-            os.makedirs(self.input_path)
         if not op.exists(self.output_path):
             os.makedirs(self.output_path)
         output_config_path = op.join(output_path, "output_config.txt")
@@ -46,7 +44,7 @@ class Validator(object):
         "\noutput_count:", self.output_count, \
         "\ninput_path:",self.input_path
     
-    def validate(self, r, _lambda):
+    def validate(self, r, _lambda = None):
         
         if not self.r or self.r != r:
             self.r = r
@@ -61,7 +59,11 @@ class Validator(object):
         "\ninit W shape:", initW.shape,\
         "\ninit H shape:", initH.shape
         
-        (W,H) = self.nmf.factorize(self.training_V, self.C, initW, initH, _lambda)
+        if _lambda:
+            (W,H) = self.nmf.factorize(self.training_V, self.C, initW, initH, _lambda)
+        else:
+            (W,H) = self.nmf.factorize(self.training_V, self.C, initW, initH)
+            
         
         WH = np.dot(W,H)
         

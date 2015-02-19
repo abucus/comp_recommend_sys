@@ -7,10 +7,10 @@ from src.decomposition.nmf import NMF
 from numpy.linalg import norm
 import numpy as np
 import os.path as op
-import logging,os
-class NMF2(NMF):
+import logging,os, datetime
+class NMF2(object):
     '''
-    classdocs
+    NMF with regularization
     '''
 
 
@@ -20,132 +20,141 @@ class NMF2(NMF):
         '''
         if(op.exists(log_path)):
             os.remove(log_path)
-        logging.basicConfig(filename = log_path,level=logging.DEBUG)
         
         
-    def factorize(self, V, WInit=None, HInit=None, max_iter=20):
+    def factorize(self, V, C, WInit=None, HInit=None, max_iter=10):
         '''
         Factorize a non-negative matrix V(nxm) into the product of W(nxr) and H(rxm) 
+        
+        V the matrix to be factorized
+        C the company matrix
         '''
         self.V = V
+        self.C = C
         self.I = np.where(V>0, 1, 0)
+        
+        self.__prepare_non_zero_idx()
+        
         W = WInit
         H = HInit
         for iter_count in range(max_iter):
-            # logging.info("iter count in factorization:{0}".format(iter_count))
-            W = self.__compute_argmin_matrix_for_f_wh(W, H, True)
-            H = self.__compute_argmin_matrix_for_f_wh(W, H, False)
+            print "in iter :",iter_count,"time begin",datetime.datetime.now()
+            self.computing_W = True
+            W = self.__compute_argmin_matrix_for_f_wh(W, H)
+            self.computing_W = False
+            H = self.__compute_argmin_matrix_for_f_wh(W, H)
         return (W, H)
+    
+    def __prepare_non_zero_idx(self):
+        self.I_non_zero_row_idx = []
+        self.I_non_zero_col_by_row = []
+        for i in range(self.I.shape[0]):
+            if np.all(self.I[i] == 0):
+                continue
+            self.I_non_zero_row_idx.append(i)
+            self.I_non_zero_col_by_row.append(np.where(self.I[i])[0])
+         
+        self.I_non_zero_col_idx = []
+        self.I_non_zero_row_by_col = []
+        for i in range(self.I.shape[1]):
+            if np.all(self.I[:,i] == 0):
+                continue
+            self.I_non_zero_col_idx.append(i)
+            self.I_non_zero_row_by_col.append(np.where(self.I[:,i])[0])
         
-    def __compute_argmin_matrix_for_f_wh(self, W, H, transpose = False):
+    def __compute_argmin_matrix_for_f_wh(self, W, H):
         '''
         Fix W(or H), compute matrix H(or W) which minimize f(W,H) := 1/2 ||V-WH||^2
         '''
-        if transpose:
-            V = self.V.T
-            M = H.T
-            I = self.I.T
-            logging.info("fix H, compute W")
+        if self.computing_W:
+            print "*** in computing W ***"
+            X_old = W
         else:
-            V = self.V
-            M = W 
-            I = self.I
-            logging.info("fix W, compute H")
-        cols = []
-        for i in range(V.shape[1]):
-            v = V[:, i]
-            iv = I[:, i]
-            if transpose:
-                x_init = W[i,:]
-            else:
-                x_init = H[:,i]
-            cols.append(self.__compute_argmin_x_for_fx(v, M, iv, x_init))
-        if transpose:
-            return np.row_stack(cols)
-        else:
-            return np.column_stack(cols)
-    
-       
-       
-    def __compute_argmin_x_for_fx(self, v, M, nni, x_init, beta=.1,
-                                    alpha_init=.1, max_iter=100):
-        '''
-        Find x which minimize f(x) := 1/2 ||v - Mx||^2
+            print "*** in computing H ***"
+            X_old = H
+        grad_f_old = self.__grad_f(W, H)
+        print "grad_f_old mean:",grad_f_old.mean(),"norm:",norm(grad_f_old)
+        f_x_old = self.__f(W, H)
+        print "f(x_old)=",f_x_old
+        alpha = 1
+        beta=.1
+        X_new = self.__p(X_old - alpha * grad_f_old)
         
-        nni the non-negative indicator vector for v
-        '''
-        #logging.info("v:"+str(v))
-        x_old = x_init#np.random.random_sample(M.shape[1])
-        alpha = alpha_init
-        grad_f_old = self.__grad_f(v, M, x_old, nni)
-        x_new = self.__p(x_old - alpha * grad_f_old)
-        logging.info("==============\nx_old_init:{0}\nx_new_init:{1}\ngrad_f_old:{2}==================".format(x_old, x_new, grad_f_old))
-        iter_count, max_iter = 0, 15
+        iter_count, max_iter = 0, 5
         
-        if self.__decrease_condition(v, M, x_old, x_new, grad_f_old, nni):
+        if f_x_old > self.__f(*((X_new, H) if self.computing_W else (W, X_new))):
             # increase step loop
+            print "*** in increasing loop ***"
             while True:
-                # logging.debug("increasing step, previous alpha is {alpha}".format(alpha=alpha))
                 alpha = alpha / beta
-                logging.info("---------------------\n x_old before update:{0}".format(x_old))
-                x_old = x_new
-                grad_f_old = self.__grad_f(v, M, x_old, nni)
-                x_new = self.__p(x_old - alpha * grad_f_old)
-                need_continue = self.__decrease_condition(v, M, x_old, x_new, grad_f_old, nni)
-                logging.info("increasing loop alpha:{0},\nx_new:{1}\n,grad_f_old{2}\ncondition:{3}".format(alpha, x_new, grad_f_old, need_continue))
+                X_new_tmp = X_new
+                X_new = self.__p(X_old - alpha * grad_f_old)
+                f_x_new = self.__f(*((X_new, H) if self.computing_W else (W, X_new)))
+                print "f(x) new:",f_x_new
+                need_continue = f_x_old > f_x_new
                 iter_count += 1
-                if iter_count == max_iter or not need_continue:
-                    logging.info("log x_old before break:{0}".format(x_old))
+                if not need_continue:
+                    print " alpha:",alpha," iter_count:",iter_count,\
+                    "\nX_new_mean:",X_new.mean(),", diff:",norm(X_new - X_old),\
+                    "\n*** exit step increasing loop ***"
+                    return X_new_tmp
+                elif iter_count == max_iter:
+                    print " alpha:",alpha," iter_count:",iter_count,\
+                    "\nX_new_mean:",X_new.mean(),", diff:",norm(X_new - X_old),\
+                    "\n*** exit step increasing loop ***"
+                    return X_new
                     break
-            logging.info("the latest x is {0}, the latest alpha is {1}\n---------------------\n ".format(x_old, alpha*beta))
-            return x_old
+            return X_new_tmp
         else:
             # decrease step loop
+            print "*** in decreasing loop ***"
             while True:
-                # logging.debug("decreasing step, previous alpha is {alpha}".format(alpha=alpha))
                 alpha = alpha * beta
-                logging.info("---------------------\n x_old before update:{0}".format(x_old))
-                x_old = x_new
-                grad_f_old = self.__grad_f(v, M, x_old, nni)
-                x_new = self.__p(x_old - alpha * grad_f_old)
-                need_continue = self.__decrease_condition(v, M, x_old, x_new, grad_f_old, nni)
-                logging.info("decreasing loop alpha:{0},\nx_new:{1}\n,grad_f_old{2}\ncondition:{3}".format(alpha, x_new, grad_f_old, need_continue))
+                X_new = self.__p(X_old - alpha * grad_f_old)
+                f_x_new = self.__f(*((X_new, H) if self.computing_W else (W, X_new)))
+                print "f(x) new:",f_x_new
+                need_continue = f_x_old > f_x_new
                 iter_count += 1
-                if iter_count == max_iter or need_continue:
-                    logging.info("log x_old before break:{0}".format(x_old))
-                    break
-            logging.info("the latest x is {0}, the latest alpha is {1}\n---------------------\n".format(x_new, alpha))
-            return x_new
-        # logging.info("has reached the max_iter:{0}".format(iter_count == max_iter))
-        
-    def __decrease_condition(self, v, M, x_old, x_new, grad_f_old, nni):
-        sigma = .01 
-        f_x_old = self.__f(v, M, x_old, nni)       
-        f_x_new = self.__f(v, M, x_new, nni)
-        condition_value = f_x_new - f_x_old - sigma * np.dot(grad_f_old, x_new - x_old)
-        # logging.info(" xk={0} \n xk+1={1}".format(x_old, x_new))
-        # logging.info(" f_xk={0} \n f_xk+1={1} \n grad_f_xk={2} \n decrease condition value:{3}".format(f_x_old, f_x_new, grad_f_old, condition_value))       
-        return condition_value <= 0
+                if need_continue:
+                    print " alpha:",alpha," iter_count:",iter_count, \
+                    "\nX_new_mean:",X_new.mean(),", diff:",norm(X_new - X_old),\
+                    "\n*** exit step decreasing loop,","computing W ***" if self.computing_W else "computingH ***",
+                    return X_new
+                elif iter_count == max_iter:
+                    print " keep ","W" if self.computing_W else "H","the same.","\n*** exit step decreasing loop ***"
+                    return X_old
         
     def __p(self, x):        
         return np.where(x < 0, 0, x)
     
-    def __f(self, v, M, x, nni):
+    def __f(self, W, H):
         '''
         Definition of f(x) = 1/2 ||(v-Mx)*nni||^2, (v1,v2)*(v3,v4)=(v1*v2,v3*v4)
         '''
-        return .5 * norm((v-np.dot(M,x))*nni)**2
+        return .5 * norm((self.V-np.dot(W,H))*self.I)**2
     
-    def __grad_f(self, v, M, x, nni):
+    def __grad_f(self, W, H):
         '''
         Compute the gradient of f(x) := 1/2 ||(v-Mx)*nni||^2, (v1,v2)*(v3,v4)=(v1*v2,v3*v4)
         '''
-        # print "v.shape {vshape} \n M.shape {mshape} \n x.shape {xshape}".format(vshape=v.shape, mshape=M.shape, xshape=x.shape)
-        rlt = np.zeros(x.shape)
-        
-        print v.shape,M.shape,x.shape,nni.shape
-        for i in range(rlt.shape[0]):
-            rlt[i] = (nni*M[:,i]*(np.dot(M,x) - v)).sum()
-        return rlt
+        timebegin = datetime.datetime.now()
+        print "cal grad time begin:",timebegin
+        V = self.V
+        I = self.I
+        C = self.C
+        if self.computing_W:
+            grad = np.zeros(W.shape)
+            for i,cols in zip(self.I_non_zero_row_idx,self.I_non_zero_col_by_row):
+                for j in range(grad.shape[1]):
+                    grad[i,j] = ((np.dot(W[i],H[:,cols]) - V[i,cols])*H[j,cols]*I[i,cols]).sum()
+        else:
+            grad = np.zeros(H.shape)
+            for j,rows in zip(self.I_non_zero_col_idx, self.I_non_zero_row_by_col):
+                for i in range(grad.shape[0]):
+                    grad[i,j] = ((np.dot(W[rows,:],H[:,j])-V[rows,j])*W[rows,i]*I[rows,j]).sum()
+        timeend = datetime.datetime.now()
+        print "cal grad time end:",timeend
+        print "cal grad time cost:",(timeend-timebegin).total_seconds()/60.," min"
+        return grad
         
         
