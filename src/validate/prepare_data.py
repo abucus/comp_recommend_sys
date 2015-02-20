@@ -7,7 +7,7 @@ import os.path as op
 import os
 from src.input.read_csv import read_in, generate_file
 
-base_path = op.join("..","..","output","data","validate")
+base_path = op.join("..","..","output","data2","validate")
 training_output = op.join(base_path, "training") 
 test_output = op.join(base_path, "test") 
 if not op.exists(training_output):
@@ -17,7 +17,7 @@ if not op.exists(test_output):
 
 training_data_ratio = .65
 
-training_data = read_in()
+training_data = read_in(source_path=op.join("..", "..", "output", "data2", "original", 'simpleB.csv'))
 test_data = {'event_types':training_data['event_types'], 'table':{}}
 test_table = test_data['table']
 training_table = training_data['table']

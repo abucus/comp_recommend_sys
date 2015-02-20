@@ -4,7 +4,7 @@ Created on Feb 19, 2015
 @author: tengmf
 '''
 import numpy as np
-from numpy import array
+import datetime
 from numpy.linalg import norm
     
     
@@ -23,8 +23,9 @@ class Measure:
             self.I_non_zero_row_idx.append(i)
 
         
-    def reset(self, R_hat, R_test):
-        self.__init__(R_hat, R_test)
+    def reset(self, R_hat):
+        self.R_hat = R_hat
+        self.diff = (R_hat - self.R_test) * self.I
         
     def mae(self):
         return norm(self.diff, 1) / self.non_zero_count
@@ -38,6 +39,7 @@ class Measure:
         count = 0
         total_precision = total_recall = 0
         for i in self.I_non_zero_row_idx:
+            #print "cal precision recall row",i," time begin:",datetime.datetime.now()
             for j in range(0, self.R_test.shape[1] - unit_len + 1, unit_len):
                 tmp_rlt = self.__cal_precision_recall(self.R_hat[i, j:(j + unit_len)],
                                                       self.R_test[i, j:(j + unit_len)])
@@ -48,16 +50,16 @@ class Measure:
         return (total_precision / count, total_recall / count)
     
     def __cal_precision_recall(self, train_score, true_score):
+        #print "in __cal_precision_recall",train_score,true_score
         if np.all(true_score == 0):
             return None
-        
-        idx = true_score > 0
-        train_score_sorted_idx = np.argsort(train_score[idx])[::-1]
-        true_score_sorted_idx = np.argsort(true_score[idx])[::-1]
+        train_score_sorted_idx = np.argsort(train_score)[::-1]
+        true_score_sorted_idx = np.where(true_score > 0)[0]
         k = min(self.precision_recall_k, len(train_score_sorted_idx))
         
-        intersect_num = np.intersect1d(train_score_sorted_idx[0:k], true_score_sorted_idx[0:k], assume_unique = True)
-        return (intersect_num*1./k, )
+        intersect_num = len(np.intersect1d(train_score_sorted_idx[0:k], true_score_sorted_idx, assume_unique = True))
+        #print intersect_num
+        return (intersect_num*1./k, intersect_num*1./len(true_score_sorted_idx))
         
     def ndcg(self, k):
         self.ndcg_k = k
@@ -65,6 +67,7 @@ class Measure:
         count = 0
         total = 0
         for i in self.I_non_zero_row_idx:
+            #print "cal ndcg row",i," time begin:",datetime.datetime.now()
             for j in range(0, self.R_test.shape[1] - unit_len + 1, unit_len):
                 tmp_rlt = self.__cal_ndcg(self.R_hat[i, j:(j + unit_len)],
                                           self.R_test[i, j:(j + unit_len)])
@@ -77,10 +80,6 @@ class Measure:
         if np.all(true_score == 0):
             return None
         
-        idx = true_score > 0
-        true_score = true_score[idx]
-        train_score = train_score[idx]
-        
         pack = zip(train_score, true_score)
         pack.sort(key=lambda l:l[0], reverse=True)
         
@@ -90,9 +89,13 @@ class Measure:
             
     def __cal_dcg(self, score):
         result = score[0]
-        for i in range(1, min(self.ndcg_k, len(score))):
-            result += score[i] / np.log2(i + 1)
+        for i in range(0, min(self.ndcg_k, len(score))):
+            result += (2.**(score[i])-1) / np.log2(i + 2)
         return result
 # m = Measure(None,None)
 # print m.__cal_ndcg(array([2,3,1,4]), array([5,6,8,3]))
 # print m.__cal_dcg(array([3,6,5,8]))/m.__cal_dcg(array([8,6,5,3]))
+# R_hat = np.array([[1, 2,  3, 13,  9, 13, 28,  4, 14], [4,  6,  8, 17, 16, 13, 16, 11, 10]])
+# R_test = np.array([[16, 17, 24, 24, 28,  7, 23, 18,  7], [10,  6, 20, 29,  3,  6,  5,  8, 10]])
+# m = Measure(R_hat, R_test)
+# print m.precision_recall(2)
