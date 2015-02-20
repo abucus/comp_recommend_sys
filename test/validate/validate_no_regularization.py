@@ -22,8 +22,8 @@ class Test(unittest.TestCase):
     def testDecomposition(self):
         nmf = NMF2()
         validator = Validator(nmf, output_path= op.join("..","..","output","data","validate","no_regularization"))
-        for r in range(100,300,100):
-            validator.validate(r)
+        #for r in range(100,300,100):
+        validator.validate(300)
 
 
 if __name__ == "__main__":

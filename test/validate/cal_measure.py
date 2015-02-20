@@ -12,10 +12,10 @@ base_path = op.join("..", "..","output","data","validate")
 k_list = [3,5,10]
 R_test = np.loadtxt(op.join(base_path, "test","pure_matrix.csv"),delimiter=",")
 m = None
-with open(op.join("..", "..","output","data","validate","measures.csv"), "w") as f:
+with open(op.join("..", "..","output","data","validate","measures.csv"), "wb") as f:
     writer = csv.writer(f)
     writer.writerow(["r", "lambda","MAE", "RMSE"]+[i+str(j) for i in ["Precision", "Recall", "NCDG"] for j in k_list])
-    for i in range(2,17):
+    for i in range(2,18):
         print "calculating folder",i,"starting time,", datetime.datetime.now()
         R_hat = np.loadtxt(op.join(base_path, str(i), "WH.txt"))
         if not m:

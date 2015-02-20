@@ -3,7 +3,7 @@ Created on Feb 15, 2015
 
 @author: tengmf
 '''
-import unittest,os,csv
+import unittest,os,csv,json
 import os.path as op
 import numpy as np
 from src.lib.nmf import nmf
@@ -17,6 +17,14 @@ class Test(unittest.TestCase):
         self.output_path = op.join("..","..","output","data","validate","nmf")
         if not op.exists(self.output_path):
             os.makedirs(self.output_path)
+        
+        if op.exists(op.join(self.output_path, "outputconfig.txt")):
+            with open(op.join(self.output_path, "outputconfig.txt")) as cf:
+                config = json.load(cf)
+                self.output_count = config['count']
+        else:
+            self.output_count = 1
+             
         self.V = np.loadtxt(op.join(self.input_path, "training", "pure_matrix.csv"), delimiter = ",")
         self.V_test = np.loadtxt(op.join(self.input_path, "test", "pure_matrix.csv"), delimiter = ",")
         self.I = np.where(self.V_test>0, 1, 0)
@@ -34,7 +42,7 @@ class Test(unittest.TestCase):
             init_W = np.random.random_sample((self.V.shape[0], r))
             init_H = np.random.random_sample((r, self.V.shape[1]))
             (W, H) = nmf(self.V, init_W, init_H, 10e-5, 100000, 10)
-            print np.dot(W,H) 
+            WH =  np.dot(W,H) 
             diff = (np.dot(W,H)-self.V_test)*self.I
             results.append([r,np.sqrt(norm(diff)**2/self.non_zero_count), norm(diff,1)/self.non_zero_count])
                 
