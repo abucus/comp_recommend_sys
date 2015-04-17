@@ -12,8 +12,8 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.input_path = op.join("..","..","output","data2","validate")
-        self.output_path = op.join("..","..","output","data2","validate","user_mean")
+        self.input_path = op.join("..","..","output","data","validate")
+        self.output_path = op.join("..","..","output","data","validate","item_mean")
         if not op.exists(self.output_path):
             os.makedirs(self.output_path)
         self.V = np.loadtxt(op.join(self.input_path, "training", "pure_matrix.csv"), delimiter = ",")
@@ -37,14 +37,14 @@ class Test(unittest.TestCase):
             R_hat = np.loadtxt(op.join(self.output_path,"R_hat.txt"))
         else:
             R_hat = np.zeros(self.V_test.shape)
-            for i in range(0, self.V.shape[0]):
+            for i in range(0, self.V.shape[1]):
                 print "constructing row",i," starting time",datetime.datetime.now()
-                row = self.V[i]
-                if np.any(row!=0):
+                col = self.V[:,i]
+                if np.any(col!=0):
                     # avg of all row elem or avg of all postive elem
-                    R_hat[i] = row[row>0].mean()
+                    R_hat[:,i] = col[col>0].mean()
             np.savetxt(op.join(self.output_path,"R_hat.txt"), R_hat)
-        '''
+        
         m = Measure(R_hat, self.V_test)
         k_list = [3,5,10]
         with open(op.join(self.output_path, "measures.txt"), "w") as f:
@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
                 ncdg_relt.append(m.ndcg(j))
 
             writer.writerow(result_1 + precision_relt + recall_relt + ncdg_relt)
-        '''
+        
             
 
 

@@ -13,14 +13,11 @@ class Test(unittest.TestCase):
 
     def testValidator(self):
         nmf = NMF3()
-        validator = Validator(nmf,input_path = op.join("..","..","output","data","validate"),
-                              output_path= op.join("..","..","output","data","validate","nmf3"))
-        r_list = [10,50,300]
-        lambda_list = [[10**(i-3) for i in range(5)],[10**(i-3) for i in range(5)],[10]]
-        for i in range(3):
-            r = r_list[i]
-            for _lambda in lambda_list[i]:
-                validator.validate(r, _lambda)
+        validator = Validator(nmf,input_path = op.join("..","..","output","data2","validate"),
+                              output_path= op.join("..","..","output","data2","validate","nmf3"))
+        #r_list = [10,50,300]
+        #lambda_list = [[10**(i-3) for i in range(5)],[10**(i-3) for i in range(5)],[10]]
+        validator.validate(100, 0.001)
 
 
 if __name__ == "__main__":

@@ -13,8 +13,8 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.input_path = op.join("..","..","output","data","validate")
-        self.output_path = op.join("..","..","output","data","validate","nmf")
+        self.input_path = op.join("..","..","output","data2","validate")
+        self.output_path = op.join("..","..","output","data2","validate","nmf")
         if not op.exists(self.output_path):
             os.makedirs(self.output_path)
         
@@ -36,21 +36,26 @@ class Test(unittest.TestCase):
 
 
     def testNMF(self):
-        results = []
         for r in range(100,400,100):
             print "r=",r," calculating..."
             init_W = np.random.random_sample((self.V.shape[0], r))
             init_H = np.random.random_sample((r, self.V.shape[1]))
-            (W, H) = nmf(self.V, init_W, init_H, 10e-5, 100000, 10)
+            (W, H) = nmf(self.V, init_W, init_H, 0.1, 100000, 2)
             WH =  np.dot(W,H) 
-            diff = (np.dot(W,H)-self.V_test)*self.I
-            results.append([r,np.sqrt(norm(diff)**2/self.non_zero_count), norm(diff,1)/self.non_zero_count])
+            cur_path = op.join(self.output_path, str(self.output_count))
+            if not op.exists(cur_path):
+                os.makedirs(cur_path)
+            np.savetxt(op.join(cur_path,"W.txt"), W)
+            np.savetxt(op.join(cur_path,"H.txt"), H)
+            np.savetxt(op.join(cur_path,"WH.txt"), WH)
                 
-        with open(op.join(self.output_path, "stat.txt"), "w") as f:
-            writer = csv.writer(f, delimiter = ",")
-            writer.writerow(["r", "RMSE", "MAE"])
-            writer.writerows(results)
+            with open(op.join(cur_path, "result.txt"), "w") as f:
+                json.dump({'r':r,'lambda':None}, f)
             
+            self.output_count += 1
+        with open(op.join(self.output_path, "outputconfig.txt"), "w") as f:
+            json.dump({'count':self.output_count}, f)
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testNMF']

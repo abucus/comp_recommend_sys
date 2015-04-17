@@ -50,7 +50,7 @@ def generate_file(data, base_file_path=op.join("..", "..", "output", "data")):
     for c in table.itervalues():
         v = c['events']
         for i in range(len(v) - 1):
-            if v[i][1] == v[i + 1][1]:
+            if v[i][1] != v[i + 1][1]:
                 interval_count += 1
                 total_days_interval += (v[i + 1][0] - v[i][0]).total_seconds() / 3600.0 / 24.0
     delta = total_days_interval / interval_count
@@ -119,3 +119,4 @@ def generate_file(data, base_file_path=op.join("..", "..", "output", "data")):
             cur_col += 1
         cur_row += 1
     np.savetxt(output_company_matrix, company_matrix)            
+#generate_file(read_in())

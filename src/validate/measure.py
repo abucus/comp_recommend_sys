@@ -4,7 +4,6 @@ Created on Feb 19, 2015
 @author: tengmf
 '''
 import numpy as np
-import datetime
 from numpy.linalg import norm
     
     

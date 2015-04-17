@@ -46,14 +46,15 @@ class Validator(object):
     
     def validate(self, r, _lambda = None):
         
-        if not self.r or self.r != r:
-            self.r = r
-            initW = self.initW = np.random.random_sample((self.training_V.shape[0], r))
-            initH = self.initH = np.random.random_sample((r, self.training_V.shape[1]))
-        else:
-            initW = self.initW
-            initH = self.initH
-            
+#         if not self.r or self.r != r:
+#             self.r = r
+#             initW = self.initW = np.random.random_sample((self.training_V.shape[0], r))
+#             initH = self.initH = np.random.random_sample((r, self.training_V.shape[1]))
+#         else:
+#             initW = self.initW
+#             initH = self.initH
+        initW = self.initW = np.random.random_sample((self.training_V.shape[0], r))
+        initH = self.initH = np.random.random_sample((r, self.training_V.shape[1]))
         print "****** init W,H done ******" \
         "\nV shape:", self.training_V.shape,\
         "\ninit W shape:", initW.shape,\

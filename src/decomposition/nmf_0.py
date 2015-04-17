@@ -8,7 +8,7 @@ from numpy.linalg import norm
 import numpy as np
 import os.path as op
 import logging,os, datetime
-class NMF2(object):
+class NMF0(object):
     '''
     NMF with regularization
     '''
@@ -22,7 +22,7 @@ class NMF2(object):
             os.remove(log_path)
         
         
-    def factorize(self, V, C, WInit=None, HInit=None, max_iter=2):
+    def factorize(self, V, C, WInit=None, HInit=None, max_iter=3):
         '''
         Factorize a non-negative matrix V(nxm) into the product of W(nxr) and H(rxm) 
         
@@ -30,8 +30,8 @@ class NMF2(object):
         C the company matrix
         '''
         self.V = V
-        self.C = C
-        self.I = np.where(V>0, 1, 0)
+        self.I = np.zeros(V.shape)
+        self.I.fill(1)
         
         self.__prepare_non_zero_idx()
         
@@ -141,17 +141,16 @@ class NMF2(object):
         print "cal grad time begin:",timebegin
         V = self.V
         I = self.I
-        C = self.C
         if self.computing_W:
             grad = np.zeros(W.shape)
-            for i,cols in zip(self.I_non_zero_row_idx,self.I_non_zero_col_by_row):
+            for i in range(grad.shape[0]):
                 for j in range(grad.shape[1]):
-                    grad[i,j] = ((np.dot(W[i],H[:,cols]) - V[i,cols])*H[j,cols]*I[i,cols]).sum()
+                    grad[i,j] = ((np.dot(W[i],H) - V[i])*H[j]*I[i]).sum()
         else:
             grad = np.zeros(H.shape)
-            for j,rows in zip(self.I_non_zero_col_idx, self.I_non_zero_row_by_col):
+            for j in range(grad.shape[1]):
                 for i in range(grad.shape[0]):
-                    grad[i,j] = ((np.dot(W[rows,:],H[:,j])-V[rows,j])*W[rows,i]*I[rows,j]).sum()
+                    grad[i,j] = ((np.dot(W,H[:,j])-V[:,j])*W[:,i]*I[:,j]).sum()
         timeend = datetime.datetime.now()
         print "cal grad time end:",timeend
         print "cal grad time cost:",(timeend-timebegin).total_seconds()/60.," min"
