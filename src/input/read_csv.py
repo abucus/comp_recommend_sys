@@ -52,12 +52,12 @@ def generate_file(data, base_file_path=op.join("..", "..", "output", "data")):
         for i in range(len(v) - 1):
             if v[i][1] != v[i + 1][1]:
                 interval_count += 1
-                total_days_interval += (v[i + 1][0] - v[i][0]).total_seconds() / 3600.0 / 24.0
-    delta = total_days_interval / interval_count
+                total_days_interval += (v[i + 1][0] - v[i][0]).total_seconds() / 3600.0 / 24.0    
+    r = total_days_interval / interval_count
     json.dump({
                "total_days_interval":total_days_interval,
                "interval_count":interval_count,
-               "delta":delta
+               "r":r
                }, open(output_stat_path, "w"))    
     
     # genearte the mapping between the column number and column name
@@ -78,10 +78,11 @@ def generate_file(data, base_file_path=op.join("..", "..", "output", "data")):
                 writer.writerow([col_num, col_name])
                 col_num += 1
     
-    # generate pure matrix and write to csv
+    # generate pure matrix and write to csv    
+    delta = 90
     m = np.full((len(table.keys()), len(event_types) ** 2), 0)
     row_names = []
-    r = 0
+    k = 0
     for cid, record in table.iteritems():
         row_names.append(str(cid))
         v = record['events']
@@ -89,10 +90,12 @@ def generate_file(data, base_file_path=op.join("..", "..", "output", "data")):
         for i in range(0, v_len):
             for j in range(i + 1, v_len):
                 if(v[i][1] == v[j][1]):
-                    m[r, col_num_name_map[v[i][1] + '@' + v[j][1]]] = 1. / v_len
+                    m[k, col_num_name_map[v[i][1] + '@' + v[j][1]]] = 1. / v_len
                 else:
-                    m[r, col_num_name_map[v[i][1] + '@' + v[j][1]]] = np.exp(-(v[j][0] - v[j - 1][0]).total_seconds() / 3600.0 / 24.0 / delta) / v_len
-        r += 1        
+                    period_in_day = (v[j][0] - v[j - 1][0]).total_seconds() / 3600.0 / 24.0
+                    if period_in_day < delta:
+                        m[k, col_num_name_map[v[i][1] + '@' + v[j][1]]] = np.exp(-period_in_day / r) / v_len
+        k += 1        
     np.savetxt(output_pure_matrix, m, delimiter=",")
     
     # generate well format csv
