@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 
 
-def read_in(source_path=op.join("..", "..", "output", "data", "original", 'simpleA2.csv')):
+def read_in(source_path=op.join("..", "..", "output", "data2", "original", 'simpleB.csv')):
     '''
     Read in all data and organize in a map like
     {'id1':[(time1,event_type1),(time2,event_type2)]} the event sequence is ordered by date-time
@@ -32,7 +32,7 @@ def read_in(source_path=op.join("..", "..", "output", "data", "original", 'simpl
         for v in table.itervalues():
             v['events'].sort(key=lambda l:l[0])
             
-    print "event_types:#", len(event_types), "\n", event_types
+    #print "event_types:#", len(event_types), "\n", event_types
     return {'event_types':event_types, 'table':table}
 
 def generate_file(data, base_file_path=op.join("..", "..", "output", "data")):
