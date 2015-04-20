@@ -91,6 +91,19 @@ class Measure:
         for i in range(0, min(self.ndcg_k, len(score))):
             result += (2.**(score[i])-1) / np.log2(i + 2)
         return result
+
+def flattern_fpmc_matrix(a):
+    user_num, item_num = a.shape[0], a.shape[1]
+    m = np.zeros((user_num, item_num**2))
+    for u in range(user_num):
+        for i in range(item_num):
+            m[u,i*item_num:(i+1)*item_num] = a[u,i]
+    return m
+
+if __name__ == "__main__":
+    a = np.array([[[1,2],[3,4]],[[5,6],[7,8]]])
+    print a.shape
+    print flattern_fpmc_matrix(a)
 # m = Measure(None,None)
 # print m.__cal_ndcg(array([2,3,1,4]), array([5,6,8,3]))
 # print m.__cal_dcg(array([3,6,5,8]))/m.__cal_dcg(array([8,6,5,3]))

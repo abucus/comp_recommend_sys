@@ -33,7 +33,7 @@ def read_in(source_path=op.join("..", "..", "output", "data2", "original", 'simp
             v['events'].sort(key=lambda l:l[0])
             
     #print "event_types:#", len(event_types), "\n", event_types
-    return {'event_types':event_types, 'table':table}
+    return {'event_types':event_types, 'table':table, 'users':table.keys()} 
 
 def generate_file(data, base_file_path=op.join("..", "..", "output", "data")):
     table = data['table']

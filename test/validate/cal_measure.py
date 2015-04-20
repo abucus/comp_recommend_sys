@@ -5,8 +5,9 @@ Created on Feb 19, 2015
 '''
 import os.path as op
 import numpy as np
-import csv,json,datetime
+import csv,json,datetime,pickle
 from src.validate.measure import Measure
+from src.validate.measure import flattern_fpmc_matrix
 
 def cal_measure():
     input_path = op.join("..", "..","output","data2","validate")
@@ -56,6 +57,25 @@ def cal2():
         print "precision@",i,pr[0]==pr2[0]
         print "recall@",i,pr[1]==pr2[1]
         print "ndcg@",i,m.ndcg(i)==m2.ndcg(i)
-    
-cal_measure()    
+
+def cal_fpmc():
+    base_path = op.join('..','..','output','fpmc_data')
+    a_train = flattern_fpmc_matrix(pickle.load(open(op.join(base_path, 'training','a'))))
+    a_test = flattern_fpmc_matrix(pickle.load(open(op.join(base_path, 'test', 'full_tensor'))))
+    print a_train.shape, a_test.shape
+    m = Measure(a_train, a_test)
+    print 'MAE:',m.mae()
+    print 'RMSE:',m.rmse()
+    k_list = [3,5,10]
+    precision_relt = []
+    recall_relt = []
+    ncdg_relt = []
+    for j in k_list:
+        pr = m.precision_recall(j)
+        print 'precision@'+str(j),pr[0]
+        print 'recall@'+str(j),pr[1]
+        print 'ncdg@'+str(j),m.ndcg(j)
+
+if __name__ == '__main__':
+    cal_fpmc()    
     
