@@ -64,7 +64,6 @@ class Validator(object):
             (W,H) = self.nmf.factorize(self.training_V, self.C, initW, initH, _lambda)
         else:
             (W,H) = self.nmf.factorize(self.training_V, self.C, initW, initH)
-            
         
         WH = np.dot(W,H)
         

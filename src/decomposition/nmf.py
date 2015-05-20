@@ -23,7 +23,7 @@ class NMF(object):
         logging.basicConfig(filename = log_path,level=logging.DEBUG)
         
         
-    def factorize(self, V, WInit=None, HInit=None, max_iter=None):
+    def factorize(self, V, C, WInit=None, HInit=None, max_iter=5):
         '''
         Factorize a non-negative matrix V(nxm) into the product of W(nxr) and H(rxm) 
         '''
