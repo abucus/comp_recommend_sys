@@ -77,5 +77,9 @@ def cal_fpmc():
         print 'ncdg@'+str(j),m.ndcg(j)
 
 if __name__ == '__main__':
-    cal_fpmc()    
+    # for nmf
+    # cal_measure()
+    
+    # for fpmc
+    # cal_fpmc()    
     
