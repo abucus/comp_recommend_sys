@@ -32,17 +32,16 @@ class Test(unittest.TestCase):
         V, C = self.V, self.C
         my_nmf = NMF3()
         time_cost = []
-        for k in [10,20]:
-            start = datetime.datetime.now()
-            W_init = np.random.normal(0,1,(V.shape[0],k))
-            H_init = np.random.normal(0,1,(k,V.shape[1]))
-            (W,H) = my_nmf.factorize(V, C, W_init, H_init)
-            time_cost.append({'k':k,'time':(datetime.datetime.now()-start).total_seconds()})
+        start = datetime.datetime.now()
+        W_init = np.random.normal(0, 1, (V.shape[0], 20))
+        H_init = np.random.normal(0, 1, (20, V.shape[1]))
+        (W, H) = my_nmf.factorize(V, C, W_init, H_init)
+        time_cost.append({'k':20, 'time':(datetime.datetime.now() - start).total_seconds()})
         print time_cost
 
         #(W, H) = my_nmf.factorize(V, self.init_W, self.init_H, 100)
-        #np.savetxt("my_nmf_W.txt", W)
-        #np.savetxt("my_nmf_H.txt", H)
+        np.savetxt("my_nmf_W.txt", W)
+        np.savetxt("my_nmf_H.txt", H)
 
 
 if __name__ == "__main__":

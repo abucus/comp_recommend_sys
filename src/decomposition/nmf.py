@@ -11,7 +11,7 @@ from numpy.linalg import norm
 
 class NMF(object):
     '''
-    classdocs
+    Original NMF
     '''
     def __init__(self):
         '''

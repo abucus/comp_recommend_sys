@@ -71,7 +71,7 @@ def update_matrix(events, matrix):
 		matrix[l,i] = 1.*count/last_count[l]
 
 if __name__ == "__main__":
-	generate_file_for_data(read_in(op.join('..','..','output','data2','original','simpleB.csv')), 
+	generate_file_for_data(read_in(op.join('..','..','output','data','original','simpleA2.csv')), 
 		out_path = op.join('..','..','output','fpmc_data'))
 
 	traing_data_dir = op.join('..','..','output','fpmc_data','training')
@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
 	if not op.exists(test_data_dir):
 		os.mkdir(test_data_dir)
-	prepare_validation_data(read_in(op.join('..','..','output','data2','original','simpleB.csv')), 
+	prepare_validation_data(read_in(op.join('..','..','output','data','original','simpleA2.csv')), 
 		op.join('..','..','output','fpmc_data'))
 
 

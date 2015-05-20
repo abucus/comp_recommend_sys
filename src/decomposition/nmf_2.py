@@ -22,7 +22,7 @@ class NMF2(object):
             os.remove(log_path)
         
         
-    def factorize(self, V, C, WInit=None, HInit=None, max_iter=2):
+    def factorize(self, V, WInit=None, HInit=None, max_iter=2):
         '''
         Factorize a non-negative matrix V(nxm) into the product of W(nxr) and H(rxm) 
         
@@ -30,7 +30,6 @@ class NMF2(object):
         C the company matrix
         '''
         self.V = V
-        self.C = C
         self.I = np.where(V>0, 1, 0)
         
         self.__prepare_non_zero_idx()
@@ -141,7 +140,6 @@ class NMF2(object):
         print "cal grad time begin:",timebegin
         V = self.V
         I = self.I
-        C = self.C
         if self.computing_W:
             grad = np.zeros(W.shape)
             for i,cols in zip(self.I_non_zero_row_idx,self.I_non_zero_col_by_row):

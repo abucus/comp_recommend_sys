@@ -18,8 +18,8 @@ class FPMC:
 		vil = self.vil = np.random.normal(0,sigma,(data['i_num'], kil))
 		vli = self.vli = np.random.normal(0,sigma,(data['i_num'], kil))
 
-		print (data['u_num']*data['i_num'])
-		for it in range(data['u_num']*data['i_num']):
+		print max(data['u_num'],data['i_num'])*30
+		for it in range(max(data['u_num'],data['i_num'])*30):
 			u = np.random.randint(0, data['u_num'])
 			t = np.random.randint(1, len(data['transactions'][u]))
 			i = data['transactions'][u][t]
