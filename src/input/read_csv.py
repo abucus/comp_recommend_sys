@@ -186,7 +186,7 @@ def cal_duij(R, i, j):
     intervals = np.array(map(lambda r:r.x, Rp))
     return np.sum(intervals / np.log2(2 + counts)) / np.sum(1. / np.log2(2 + counts))
         
-def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2", "PIMF")):
+def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2", "PIMF"), is_test = False):
     logger = get_logger(__name__)
     
     if not op.exists(base_file_path):
@@ -240,6 +240,8 @@ def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2
     np.savetxt(op.join(base_file_path, 'utility'), utility)
     logger.info("utility matrix dumped")
     
+    if is_test:
+        return
     # generate d(u,i,j)
     # d = {(u,i,j):duij}
     d = dict()

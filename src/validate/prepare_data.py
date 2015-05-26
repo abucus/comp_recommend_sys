@@ -60,7 +60,7 @@ def prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data
         del v['events'][split_idx+1:total]
         
     generate_PIMF_data(training_data, training_output)
-    generate_PIMF_data(test_data, test_output)
+    generate_PIMF_data(test_data, test_output, True)
     
 if __name__ == '__main__':
     prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data2", "original", 'simpleB.csv'), out_path = op.join("..","..","output","data2","validate","pimf"))
