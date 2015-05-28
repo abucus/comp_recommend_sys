@@ -14,21 +14,21 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.input_path = base_path = op.join("..","..","output", "nmf2")
+        self.input_path = base_path = op.join("..", "..", "output", "nmf2")
         if not op.exists(base_path):
             os.makedirs(base_path)
         self.log_path = op.join(base_path, "nmf2.log")
         if op.exists(self.log_path):
             os.remove(self.log_path)
             
-        #row_num = 25
-        #col_num = 125
-        #r = 5
-        #self.V = np.random.random_sample((row_num, col_num))
+        # row_num = 25
+        # col_num = 125
+        # r = 5
+        # self.V = np.random.random_sample((row_num, col_num))
         self.V = np.loadtxt(op.join(base_path, "nmf_V.txt"))
-        self.init_W = np.loadtxt(op.join(base_path, "nmf_init_W.txt"))#np.random.random_sample((row_num, r))
-        self.init_H = np.loadtxt(op.join(base_path, "nmf_init_H.txt"))#np.random.random_sample((r, col_num))
-        #np.savetxt("my_nmf_V.txt", self.V)
+        self.init_W = np.loadtxt(op.join(base_path, "nmf_init_W.txt"))  # np.random.random_sample((row_num, r))
+        self.init_H = np.loadtxt(op.join(base_path, "nmf_init_H.txt"))  # np.random.random_sample((r, col_num))
+        # np.savetxt("my_nmf_V.txt", self.V)
 
 
     def tearDown(self):
@@ -42,5 +42,5 @@ class Test(unittest.TestCase):
         np.savetxt(op.join(self.input_path, "my_nmf_2_H.txt"), H)
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
+    # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

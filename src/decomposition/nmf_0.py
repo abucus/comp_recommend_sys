@@ -7,14 +7,14 @@ from src.decomposition.nmf import NMF
 from numpy.linalg import norm
 import numpy as np
 import os.path as op
-import logging,os, datetime
+import logging, os, datetime
 class NMF0(object):
     '''
     NMF with regularization
     '''
 
 
-    def __init__(self, log_path = op.join(".","my_nmf.log")):
+    def __init__(self, log_path=op.join(".", "my_nmf.log")):
         '''
         Constructor
         '''
@@ -38,7 +38,7 @@ class NMF0(object):
         W = WInit
         H = HInit
         for iter_count in range(max_iter):
-            print "in iter :",iter_count,"time begin",datetime.datetime.now()
+            print "in iter :", iter_count, "time begin", datetime.datetime.now()
             self.computing_W = True
             W = self.__compute_argmin_matrix_for_f_wh(W, H)
             self.computing_W = False
@@ -57,10 +57,10 @@ class NMF0(object):
         self.I_non_zero_col_idx = []
         self.I_non_zero_row_by_col = []
         for i in range(self.I.shape[1]):
-            if np.all(self.I[:,i] == 0):
+            if np.all(self.I[:, i] == 0):
                 continue
             self.I_non_zero_col_idx.append(i)
-            self.I_non_zero_row_by_col.append(np.where(self.I[:,i])[0])
+            self.I_non_zero_row_by_col.append(np.where(self.I[:, i])[0])
         
     def __compute_argmin_matrix_for_f_wh(self, W, H):
         '''
@@ -73,11 +73,11 @@ class NMF0(object):
             print "*** in computing H ***"
             X_old = H
         grad_f_old = self.__grad_f(W, H)
-        print "grad_f_old mean:",grad_f_old.mean(),"norm:",norm(grad_f_old)
+        print "grad_f_old mean:", grad_f_old.mean(), "norm:", norm(grad_f_old)
         f_x_old = self.__f(W, H)
-        print "f(x_old)=",f_x_old
+        print "f(x_old)=", f_x_old
         alpha = 1
-        beta=.1
+        beta = .1
         X_new = self.__p(X_old - alpha * grad_f_old)
         
         iter_count, max_iter = 0, 5
@@ -90,17 +90,17 @@ class NMF0(object):
                 X_new_tmp = X_new
                 X_new = self.__p(X_old - alpha * grad_f_old)
                 f_x_new = self.__f(*((X_new, H) if self.computing_W else (W, X_new)))
-                print "f(x) new:",f_x_new
+                print "f(x) new:", f_x_new
                 need_continue = f_x_old > f_x_new
                 iter_count += 1
                 if not need_continue:
-                    print " alpha:",alpha," iter_count:",iter_count,\
-                    "\nX_new_mean:",X_new.mean(),", diff:",norm(X_new - X_old),\
+                    print " alpha:", alpha, " iter_count:", iter_count, \
+                    "\nX_new_mean:", X_new.mean(), ", diff:", norm(X_new - X_old), \
                     "\n*** exit step increasing loop ***"
                     return X_new_tmp
                 elif iter_count == max_iter:
-                    print " alpha:",alpha," iter_count:",iter_count,\
-                    "\nX_new_mean:",X_new.mean(),", diff:",norm(X_new - X_old),\
+                    print " alpha:", alpha, " iter_count:", iter_count, \
+                    "\nX_new_mean:", X_new.mean(), ", diff:", norm(X_new - X_old), \
                     "\n*** exit step increasing loop ***"
                     return X_new
                     break
@@ -112,16 +112,16 @@ class NMF0(object):
                 alpha = alpha * beta
                 X_new = self.__p(X_old - alpha * grad_f_old)
                 f_x_new = self.__f(*((X_new, H) if self.computing_W else (W, X_new)))
-                print "f(x) new:",f_x_new
+                print "f(x) new:", f_x_new
                 need_continue = f_x_old > f_x_new
                 iter_count += 1
                 if need_continue:
-                    print " alpha:",alpha," iter_count:",iter_count, \
-                    "\nX_new_mean:",X_new.mean(),", diff:",norm(X_new - X_old),\
-                    "\n*** exit step decreasing loop,","computing W ***" if self.computing_W else "computingH ***",
+                    print " alpha:", alpha, " iter_count:", iter_count, \
+                    "\nX_new_mean:", X_new.mean(), ", diff:", norm(X_new - X_old), \
+                    "\n*** exit step decreasing loop,", "computing W ***" if self.computing_W else "computingH ***",
                     return X_new
                 elif iter_count == max_iter:
-                    print " keep ","W" if self.computing_W else "H","the same.","\n*** exit step decreasing loop ***"
+                    print " keep ", "W" if self.computing_W else "H", "the same.", "\n*** exit step decreasing loop ***"
                     return X_old
         
     def __p(self, x):        
@@ -131,29 +131,29 @@ class NMF0(object):
         '''
         Definition of f(x) = 1/2 ||(v-Mx)*nni||^2, (v1,v2)*(v3,v4)=(v1*v2,v3*v4)
         '''
-        return .5 * norm((self.V-np.dot(W,H))*self.I)**2
+        return .5 * norm((self.V - np.dot(W, H)) * self.I) ** 2
     
     def __grad_f(self, W, H):
         '''
         Compute the gradient of f(x) := 1/2 ||(v-Mx)*nni||^2, (v1,v2)*(v3,v4)=(v1*v2,v3*v4)
         '''
         timebegin = datetime.datetime.now()
-        print "cal grad time begin:",timebegin
+        print "cal grad time begin:", timebegin
         V = self.V
         I = self.I
         if self.computing_W:
             grad = np.zeros(W.shape)
             for i in range(grad.shape[0]):
                 for j in range(grad.shape[1]):
-                    grad[i,j] = ((np.dot(W[i],H) - V[i])*H[j]*I[i]).sum()
+                    grad[i, j] = ((np.dot(W[i], H) - V[i]) * H[j] * I[i]).sum()
         else:
             grad = np.zeros(H.shape)
             for j in range(grad.shape[1]):
                 for i in range(grad.shape[0]):
-                    grad[i,j] = ((np.dot(W,H[:,j])-V[:,j])*W[:,i]*I[:,j]).sum()
+                    grad[i, j] = ((np.dot(W, H[:, j]) - V[:, j]) * W[:, i] * I[:, j]).sum()
         timeend = datetime.datetime.now()
-        print "cal grad time end:",timeend
-        print "cal grad time cost:",(timeend-timebegin).total_seconds()/60.," min"
+        print "cal grad time end:", timeend
+        print "cal grad time cost:", (timeend - timebegin).total_seconds() / 60., " min"
         return grad
         
         

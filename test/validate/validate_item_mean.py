@@ -3,7 +3,7 @@ Created on Feb 19, 2015
 
 @author: tengmf
 '''
-import unittest,os,csv,datetime
+import unittest, os, csv, datetime
 import os.path as op
 import numpy as np
 from src.validate.measure import Measure
@@ -12,12 +12,12 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.input_path = op.join("..","..","output","data","validate")
-        self.output_path = op.join("..","..","output","data","validate","item_mean")
+        self.input_path = op.join("..", "..", "output", "data", "validate")
+        self.output_path = op.join("..", "..", "output", "data", "validate", "item_mean")
         if not op.exists(self.output_path):
             os.makedirs(self.output_path)
-        self.V = np.loadtxt(op.join(self.input_path, "training", "pure_matrix.csv"), delimiter = ",")
-        self.V_test = np.loadtxt(op.join(self.input_path, "test", "pure_matrix.csv"), delimiter = ",")
+        self.V = np.loadtxt(op.join(self.input_path, "training", "pure_matrix.csv"), delimiter=",")
+        self.V_test = np.loadtxt(op.join(self.input_path, "test", "pure_matrix.csv"), delimiter=",")
 
     def tearDown(self):
         pass
@@ -32,26 +32,26 @@ class Test(unittest.TestCase):
 #             v = np.abs(self.V_test[i,j] - user_mean[i]) 
 #             abs_sum += v
 #             square_sum += v**2
-        if op.exists(op.join(self.output_path,"R_hat.txt")):
+        if op.exists(op.join(self.output_path, "R_hat.txt")):
             print "load R_hat"
-            R_hat = np.loadtxt(op.join(self.output_path,"R_hat.txt"))
+            R_hat = np.loadtxt(op.join(self.output_path, "R_hat.txt"))
         else:
             R_hat = np.zeros(self.V_test.shape)
             for i in range(0, self.V.shape[1]):
-                print "constructing row",i," starting time",datetime.datetime.now()
-                col = self.V[:,i]
-                if np.any(col!=0):
+                print "constructing row", i, " starting time", datetime.datetime.now()
+                col = self.V[:, i]
+                if np.any(col != 0):
                     # avg of all row elem or avg of all postive elem
-                    R_hat[:,i] = col[col>0].mean()
-            np.savetxt(op.join(self.output_path,"R_hat.txt"), R_hat)
+                    R_hat[:, i] = col[col > 0].mean()
+            np.savetxt(op.join(self.output_path, "R_hat.txt"), R_hat)
         
         m = Measure(R_hat, self.V_test)
-        k_list = [3,5,10]
+        k_list = [3, 5, 10]
         with open(op.join(self.output_path, "measures.txt"), "w") as f:
-            writer = csv.writer(f, delimiter = ",")
-            writer.writerow(["MAE", "RMSE"]+[i+str(j) for i in ["Precision", "Recall", "NCDG"] for j in k_list])
+            writer = csv.writer(f, delimiter=",")
+            writer.writerow(["MAE", "RMSE"] + [i + str(j) for i in ["Precision", "Recall", "NCDG"] for j in k_list])
             result_1 = [m.mae(), m.rmse()]
-            #writer.writerow([np.sqrt(square_sum/non_zero_count), abs_sum/non_zero_count])
+            # writer.writerow([np.sqrt(square_sum/non_zero_count), abs_sum/non_zero_count])
             precision_relt = []
             recall_relt = []
             ncdg_relt = []
@@ -67,5 +67,5 @@ class Test(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testUserMean']
+    # import sys;sys.argv = ['', 'Test.testUserMean']
     unittest.main()

@@ -4,7 +4,7 @@ Created on Feb 12, 2015
 @author: tengmf
 '''
 import unittest
-from src.input.read_csv import generate_file,read_in
+from src.input.read_csv import generate_file, read_in
 import os.path as op
 class Test(unittest.TestCase):
 
@@ -15,5 +15,5 @@ class Test(unittest.TestCase):
         
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testReadCSV']
+    # import sys;sys.argv = ['', 'Test.testReadCSV']
     unittest.main()

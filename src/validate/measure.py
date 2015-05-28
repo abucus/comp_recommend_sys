@@ -38,7 +38,7 @@ class Measure:
         count = 0
         total_precision = total_recall = 0
         for i in self.I_non_zero_row_idx:
-            #print "cal precision recall row",i," time begin:",datetime.datetime.now()
+            # print "cal precision recall row",i," time begin:",datetime.datetime.now()
             for j in range(0, self.R_test.shape[1] - unit_len + 1, unit_len):
                 tmp_rlt = self.__cal_precision_recall(self.R_hat[i, j:(j + unit_len)],
                                                       self.R_test[i, j:(j + unit_len)])
@@ -49,16 +49,16 @@ class Measure:
         return (total_precision / count, total_recall / count)
     
     def __cal_precision_recall(self, train_score, true_score):
-        #print "in __cal_precision_recall",train_score,true_score
+        # print "in __cal_precision_recall",train_score,true_score
         if np.all(true_score == 0):
             return None
         train_score_sorted_idx = np.argsort(train_score)[::-1]
         true_score_sorted_idx = np.where(true_score > 0)[0]
         k = min(self.precision_recall_k, len(train_score_sorted_idx))
         
-        intersect_num = len(np.intersect1d(train_score_sorted_idx[0:k], true_score_sorted_idx, assume_unique = True))
-        #print intersect_num
-        return (intersect_num*1./k, intersect_num*1./len(true_score_sorted_idx))
+        intersect_num = len(np.intersect1d(train_score_sorted_idx[0:k], true_score_sorted_idx, assume_unique=True))
+        # print intersect_num
+        return (intersect_num * 1. / k, intersect_num * 1. / len(true_score_sorted_idx))
         
     def ndcg(self, k):
         self.ndcg_k = k
@@ -66,7 +66,7 @@ class Measure:
         count = 0
         total = 0
         for i in self.I_non_zero_row_idx:
-            #print "cal ndcg row",i," time begin:",datetime.datetime.now()
+            # print "cal ndcg row",i," time begin:",datetime.datetime.now()
             for j in range(0, self.R_test.shape[1] - unit_len + 1, unit_len):
                 tmp_rlt = self.__cal_ndcg(self.R_hat[i, j:(j + unit_len)],
                                           self.R_test[i, j:(j + unit_len)])
@@ -89,19 +89,19 @@ class Measure:
     def __cal_dcg(self, score):
         result = score[0]
         for i in range(0, min(self.ndcg_k, len(score))):
-            result += (2.**(score[i])-1) / np.log2(i + 2)
+            result += (2.**(score[i]) - 1) / np.log2(i + 2)
         return result
 
 def flattern_fpmc_matrix(a):
     user_num, item_num = a.shape[0], a.shape[1]
-    m = np.zeros((user_num, item_num**2))
+    m = np.zeros((user_num, item_num ** 2))
     for u in range(user_num):
         for i in range(item_num):
-            m[u,i*item_num:(i+1)*item_num] = a[u,i]
+            m[u, i * item_num:(i + 1) * item_num] = a[u, i]
     return m
 
 if __name__ == "__main__":
-    a = np.array([[[1,2],[3,4]],[[5,6],[7,8]]])
+    a = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
     print a.shape
     print flattern_fpmc_matrix(a)
 # m = Measure(None,None)

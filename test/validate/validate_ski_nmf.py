@@ -15,12 +15,12 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.input_path = op.join("..","..","output","data","validate")
-        self.output_path = op.join("..","..","output","data","validate","nmf_ski")
+        self.input_path = op.join("..", "..", "output", "data", "validate")
+        self.output_path = op.join("..", "..", "output", "data", "validate", "nmf_ski")
         if not op.exists(self.output_path):
             os.makedirs(self.output_path)
-        self.V = np.loadtxt(op.join(self.input_path, "training", "pure_matrix.csv"), delimiter = ",")
-        self.V_test = np.loadtxt(op.join(self.input_path, "test", "pure_matrix.csv"), delimiter = ",")
+        self.V = np.loadtxt(op.join(self.input_path, "training", "pure_matrix.csv"), delimiter=",")
+        self.V_test = np.loadtxt(op.join(self.input_path, "test", "pure_matrix.csv"), delimiter=",")
 
 
     def tearDown(self):
@@ -35,5 +35,5 @@ class Test(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testDecomposition']
+    # import sys;sys.argv = ['', 'Test.testDecomposition']
     unittest.main()

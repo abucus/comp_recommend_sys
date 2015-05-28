@@ -61,7 +61,7 @@ class Test(unittest.TestCase):
         
         measure = Measure(R_hat=pimf.utility, R_test=np.loadtxt(op.join(base_path, 'test', 'utility')))
         
-        with open(op.join(base_path, 'full_result.csv'), 'wb') as f:
+        with open(op.join(base_path, 'test_result.csv'), 'wb') as f:
             writer = csv.writer(f)
             for p in total_precision:
                 writer.writerow(['precisions@{}'.format(p[0]), p[1]]) 

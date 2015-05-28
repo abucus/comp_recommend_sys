@@ -17,10 +17,10 @@ class NMF(object):
         '''
         Constructor
         '''
-        log_path = op.join("..","..","log","my_npm.log")
+        log_path = op.join("..", "..", "log", "my_npm.log")
         if(op.exists(log_path)):
             os.remove(log_path)
-        logging.basicConfig(filename = log_path,level=logging.DEBUG)
+        logging.basicConfig(filename=log_path, level=logging.DEBUG)
         
         
     def factorize(self, V, C, WInit=None, HInit=None, max_iter=5):
@@ -37,7 +37,7 @@ class NMF(object):
             H = self.__compute_argmin_matrix_for_f_wh(W, H, False)
         return (W, H)
         
-    def __compute_argmin_matrix_for_f_wh(self, W, H, transpose = False):
+    def __compute_argmin_matrix_for_f_wh(self, W, H, transpose=False):
         '''
         Fix W(or H), compute matrix H(or W) which minimize f(W,H) := 1/2 ||V-WH||^2
         '''
@@ -53,9 +53,9 @@ class NMF(object):
         for i in range(V.shape[1]):
             v = V[:, i]
             if transpose:
-                x_init = W[i,:]
+                x_init = W[i, :]
             else:
-                x_init = H[:,i]
+                x_init = H[:, i]
             cols.append(self.__compute_argmin_x_for_fx(v, M, x_init))
         if transpose:
             return np.row_stack(cols)
@@ -69,8 +69,8 @@ class NMF(object):
         '''
         Find x which minimize f(x) := 1/2 ||v - Mx||^2
         '''
-        #logging.info("v:"+str(v))
-        x_old = x_init#np.random.random_sample(M.shape[1])
+        # logging.info("v:"+str(v))
+        x_old = x_init  # np.random.random_sample(M.shape[1])
         alpha = alpha_init
         grad_f_old = self.__grad_f(v, M, x_old)
         x_new = self.__p(x_old - alpha * grad_f_old)
@@ -92,7 +92,7 @@ class NMF(object):
                 if iter_count == max_iter or not need_continue:
                     logging.info("log x_old before break:{0}".format(x_old))
                     break
-            logging.info("the latest x is {0}, the latest alpha is {1}\n---------------------\n ".format(x_old, alpha*beta))
+            logging.info("the latest x is {0}, the latest alpha is {1}\n---------------------\n ".format(x_old, alpha * beta))
             return x_old
         else:
             # decrease step loop

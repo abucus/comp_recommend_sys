@@ -5,21 +5,21 @@ Created on Feb 12, 2015
 '''
 import os.path as op
 import numpy as np
-import json,os
+import json, os
 from numpy.linalg import norm
 class Validator(object):
     '''
     classdocs
     '''
 
-    def __init__(self, nmf, input_path = op.join("..","..","output","data","validate"), 
-                 output_path= op.join("..","..","output","data","validate")):
+    def __init__(self, nmf, input_path=op.join("..", "..", "output", "data", "validate"),
+                 output_path=op.join("..", "..", "output", "data", "validate")):
         '''
         Constructor
         '''
         self.nmf = nmf
-        #training_stat =open(op.join(input_path, "training","stat"))
-        #test_stat =open(op.join(input_path, "test","stat"))
+        # training_stat =open(op.join(input_path, "training","stat"))
+        # test_stat =open(op.join(input_path, "test","stat"))
         self.input_path = input_path
         self.output_path = output_path
         
@@ -35,16 +35,16 @@ class Validator(object):
             self.output_count = output_config['count']
             
         self.r = None
-        self.training_V = np.loadtxt(op.join(self.input_path, "training","pure_matrix.csv"), delimiter=",")
-        self.C = np.loadtxt(op.join(self.input_path, "training","company_matrix"))
-        self.test_V = np.loadtxt(op.join(self.input_path, "test","pure_matrix.csv"), delimiter=",")
-        self.I = np.where(self.test_V>0, 1, 0)
+        self.training_V = np.loadtxt(op.join(self.input_path, "training", "pure_matrix.csv"), delimiter=",")
+        self.C = np.loadtxt(op.join(self.input_path, "training", "company_matrix"))
+        self.test_V = np.loadtxt(op.join(self.input_path, "test", "pure_matrix.csv"), delimiter=",")
+        self.I = np.where(self.test_V > 0, 1, 0)
         self.non_zero_count = self.I.sum()
         print "****** validator init done ******" \
         "\noutput_count:", self.output_count, \
-        "\ninput_path:",self.input_path
+        "\ninput_path:", self.input_path
     
-    def validate(self, r, _lambda = None):
+    def validate(self, r, _lambda=None):
         
 #         if not self.r or self.r != r:
 #             self.r = r
@@ -56,29 +56,29 @@ class Validator(object):
         initW = self.initW = np.random.random_sample((self.training_V.shape[0], r))
         initH = self.initH = np.random.random_sample((r, self.training_V.shape[1]))
         print "****** init W,H done ******" \
-        "\nV shape:", self.training_V.shape,\
-        "\ninit W shape:", initW.shape,\
+        "\nV shape:", self.training_V.shape, \
+        "\ninit W shape:", initW.shape, \
         "\ninit H shape:", initH.shape
         
         if _lambda:
-            (W,H) = self.nmf.factorize(self.training_V, self.C, initW, initH, _lambda)
+            (W, H) = self.nmf.factorize(self.training_V, self.C, initW, initH, _lambda)
         else:
-            (W,H) = self.nmf.factorize(self.training_V, self.C, initW, initH)
+            (W, H) = self.nmf.factorize(self.training_V, self.C, initW, initH)
         
-        WH = np.dot(W,H)
+        WH = np.dot(W, H)
         
         output_path = op.join(self.output_path, str(self.output_count))
         if not op.exists(output_path):
             os.makedirs(output_path)
-        np.savetxt(op.join(output_path,"W.csv"), W)
-        np.savetxt(op.join(output_path,"H.csv"), H)
+        np.savetxt(op.join(output_path, "W.csv"), W)
+        np.savetxt(op.join(output_path, "H.csv"), H)
         np.savetxt(op.join(output_path, "WH.txt"), WH)
-        del W,H
+        del W, H
         
         
-        diff = (WH-self.test_V)*self.I
+        diff = (WH - self.test_V) * self.I
         with open(op.join(output_path, "result.txt"), 'w') as f:
-            json.dump({'rmse': np.sqrt(norm(diff)**2/self.non_zero_count), 'mae': norm(diff,1)/self.non_zero_count, 'r':r, 'lambda':_lambda}, f)
+            json.dump({'rmse': np.sqrt(norm(diff) ** 2 / self.non_zero_count), 'mae': norm(diff, 1) / self.non_zero_count, 'r':r, 'lambda':_lambda}, f)
         
         del WH
         
