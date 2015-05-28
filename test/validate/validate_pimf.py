@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
         total_recall = []
         total_ndcg = []
         
-        validate_data_path = op.join(base_path)
+        validate_data_path = op.join(base_path,'test')
         pimf_true = PIMF(validate_data_path, k=50, mu=2)
         
         for k in [3, 5, 10]:
