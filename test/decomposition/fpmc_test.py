@@ -12,14 +12,14 @@ class FPMC_Test(unittest.TestCase):
 		(vui,viu,vil,vli) = fpmc.factorize(data, 50, 50, .2, .5)
 		
 		out_path = op.join('..','..','output','fpmc_data','training')
-		np.savetxt(op.join(out_path,'vui'), vui)
-		np.savetxt(op.join(out_path,'viu'), viu)
-		np.savetxt(op.join(out_path,'vil'), vil)
-		np.savetxt(op.join(out_path,'vli'), vli)
+# 		np.savetxt(op.join(out_path,'vui'), vui)
+# 		np.savetxt(op.join(out_path,'viu'), viu)
+# 		np.savetxt(op.join(out_path,'vil'), vil)
+# 		np.savetxt(op.join(out_path,'vli'), vli)
 		print 'start cal a'
 		fpmc.cal_a()
 		print 'end cal a'
-		pickle.dump(fpmc.a, open(op.join(out_path,'a'), 'w'))
+		#pickle.dump(fpmc.a, open(op.join(out_path,'a'), 'w'))
 
 
 if __name__ == "__main__":

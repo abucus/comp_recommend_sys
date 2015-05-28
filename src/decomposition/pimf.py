@@ -19,7 +19,6 @@ class PIMF(object):
         Constructor
         '''
         self.logger = get_logger(__name__)
-        base_path = op.join(base_path,'training')
         self.base_path = base_path 
         
         self.dp = pickle.load(open(op.join(base_path, 'dp'), 'r'))
@@ -41,12 +40,17 @@ class PIMF(object):
         
         if not k:
             k = int(min(*(init_utility.shape)) / 5)
-        init_W = np.random.random_sample((init_utility.shape[0], k))
-        init_H = np.random.random_sample((k, init_utility.shape[1]))
-        (W, H) = nmf(init_utility, init_W, init_H, 1e-5, 3600, 100)
-        self.utility = W.dot(H)
-        del init_W, init_H, W, H
-        self.logger.info('computed utility matrix')
+        if op.exists(op.join(base_path, 'utility_approximation')):
+            self.utility = np.loadtxt(op.join(base_path, 'utility_approximation'))
+            self.logger.info('utility approximation loaded')
+        else:
+            init_W = np.random.random_sample((init_utility.shape[0], k))
+            init_H = np.random.random_sample((k, init_utility.shape[1]))
+            (W, H) = nmf(init_utility, init_W, init_H, 1e-5, 1800, 50)
+            self.utility = W.dot(H)
+            np.savetxt(op.join(base_path, 'utility_approximation'), self.utility)
+            del init_W, init_H, W, H
+            self.logger.info('utility approximation computed')
         
         self.mu = mu
     
@@ -63,6 +67,11 @@ class PIMF(object):
             probs[i] = self.__cal_purchae_prob(u, i, t)
         #return probs[-k:][::-1]
         return np.argsort(probs)[-k:][::-1]
+    
+    def purchae_prob(self, u, t, i):
+        if type(i) == str:
+            i = self.event_map[i]
+        return self.__cal_purchae_prob(u, i, t)
     
     def __cal_us(self, u, i, t):
         '''

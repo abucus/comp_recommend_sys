@@ -295,8 +295,8 @@ def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2
 if __name__ == '__main__':
 #     d = dict()
 #     d['table'] = {'jkdajfakjsdklfj':{'events':[(1, 'c'), (8, 'd'), (13, 'b'), (16, 'e'), (18, 'b'), (22, 'a')]}}
-    generate_PIMF_data(read_in(source_path=op.join("..", "..", "output", "data2", "original", 'small.csv')),
-                        base_file_path=op.join("..", "..", "output", "data2", "PIMF"))
+    generate_PIMF_data(read_in(source_path=op.join("..", "..", "output", "data2", "original", 'simpleB.csv')),
+                        base_file_path=op.join("..","..","output","data2","validate","pimf"))
 #     R = generate_R([(1, 'c'), (8, 'd'), (13, 'b'), (16, 'e'), (18, 'b'), (22, 'a')], 20)
 #     for i in ['a','b','c','d','e']:
 #         for j in ['a','b','c','d','e']:
