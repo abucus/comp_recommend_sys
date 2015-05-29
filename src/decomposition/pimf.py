@@ -28,14 +28,14 @@ class PIMF(object):
         self.user_num = len(self.user_map)
         self.logger.info('loaded user map ')
         
-        self.event_map = pickle.load(open(op.join(base_path, 'event_map'),'r'))
+        self.event_map = pickle.load(open(op.join(base_path, 'event_map'), 'r'))
         self.event_num = len(self.event_map)
         self.logger.info('loaded event map ')
         
         init_utility = np.loadtxt(op.join(base_path, 'utility'))
         self.logger.info('loaded init utility matrix map ')
         
-        self.table = pickle.load(open(op.join(base_path, 'table'),'r'))
+        self.table = pickle.load(open(op.join(base_path, 'table'), 'r'))
         self.logger.info('loaded table')
         
         if not k:
@@ -65,7 +65,7 @@ class PIMF(object):
         probs = np.zeros((self.event_num,))
         for i in xrange(self.event_num):
             probs[i] = self.__cal_purchae_prob(u, i, t)
-        #return probs[-k:][::-1]
+        # return probs[-k:][::-1]
         return np.argsort(probs)[-k:][::-1]
     
     def purchae_prob(self, u, t, i):
@@ -89,7 +89,8 @@ class PIMF(object):
         for e in events:
             tj = e[0]
             ej = self.event_map[e[1]]
-            v = 1. / np.log2(np.abs(cal_interval_in_days(tj, t) - self.dp.get((u, ej, i), 0)) + 2)
+            #v = 1. / np.log2(np.abs(cal_interval_in_days(tj, t) - self.dp.get((u, ej, i), 0)) + 2)
+            v = 1. / np.log2(np.abs(cal_interval_in_days(tj, t) - self.dp[self.user_map[u],ej,i] + 2))
             piuij.append(v)
         
         rlt = np.max(piuij)

@@ -19,8 +19,8 @@ class Test(unittest.TestCase):
 
 
     def testPIMF(self):
-        base_path = op.join('..', '..', 'output', 'data2', 'validate', 'pimf')
-        pimf = PIMF(op.join(base_path,'training'), k=50, mu=2)
+        base_path = op.join('..', '..', 'output', 'data', 'validate', 'pimf')
+        pimf = PIMF(op.join(base_path, 'training'), k=50, mu=2)
         test_data = pickle.load(open(op.join(base_path, 'test', 'table'), 'r'))
         event_map = pickle.load(open(op.join(base_path, 'test', 'event_map'), 'r'))
         
@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
         total_recall = []
         total_ndcg = []
         
-        validate_data_path = op.join(base_path,'test')
+        validate_data_path = op.join(base_path, 'test')
         pimf_true = PIMF(validate_data_path, k=50, mu=2)
         
         for k in [3, 5, 10]:
@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
                     t = u_data['events'][0][0]
                     
                     recommend = pimf.predict(u, t, k)
-                    if relevant.shape[0]<k or recommend.shape[0]<k:
+                    if relevant.shape[0] < k or recommend.shape[0] < k:
                         continue
                     pr = precision_recall(recommend, relevant)
                     precisions.append(pr[0])

@@ -4,7 +4,9 @@ Created on Feb 19, 2015
 @author: tengmf
 '''
 import numpy as np
+import os.path as op
 from numpy.linalg import norm
+import json
     
     
 class Measure:
@@ -79,18 +81,28 @@ class Measure:
         if np.all(true_score == 0):
             return None
         
-        pack = zip(train_score, true_score)
+        pack0 = zip(train_score, true_score)
+        pack = [x for x in pack0 if x[1]>0]
+        if len(pack)<self.ndcg_k:
+            return None
+        
         pack.sort(key=lambda l:l[0], reverse=True)
         
-        dcg = self.__cal_dcg(zip(*pack)[1]) 
-        idcg = self.__cal_dcg(sorted(true_score, reverse=True))
-        return dcg / idcg
+        score = self.__normalize(np.array([x[1] for x in pack]))
+        
+        dcg = self.__cal_dcg(score) 
+        idcg = self.__cal_dcg(sorted(score, reverse=True))
+        
+        return dcg / (idcg+np.spacing(0))
             
     def __cal_dcg(self, score):
         result = score[0]
         for i in range(0, min(self.ndcg_k, len(score))):
             result += (2.**(score[i]) - 1) / np.log2(i + 2)
         return result
+    
+    def __normalize(self, scores):
+        return (scores-np.min(scores))/(np.max(scores) - np.min(scores) + np.spacing(0))
 
 def flattern_fpmc_matrix(a):
     user_num, item_num = a.shape[0], a.shape[1]
@@ -101,9 +113,13 @@ def flattern_fpmc_matrix(a):
     return m
 
 if __name__ == "__main__":
-    a = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
-    print a.shape
-    print flattern_fpmc_matrix(a)
+    R_hat = np.loadtxt(op.join("..","..","output", "data2", "validate", "nmf3", "149", "WH.txt"))
+    R_test =  np.loadtxt(op.join("..","..","output", "data2", "validate", "test", "pure_matrix.csv"),delimiter=',')
+    m = Measure(R_hat,R_test)
+    print m.ndcg(3),m.ndcg(5),m.ndcg(10)
+#     a = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+#     print a.shape
+#     print flattern_fpmc_matrix(a)
 # m = Measure(None,None)
 # print m.__cal_ndcg(array([2,3,1,4]), array([5,6,8,3]))
 # print m.__cal_dcg(array([3,6,5,8]))/m.__cal_dcg(array([8,6,5,3]))

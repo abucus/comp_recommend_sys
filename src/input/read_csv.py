@@ -1,6 +1,6 @@
 from collections import namedtuple, Counter
 from datetime import datetime
-import os, json, pickle, csv, time,logging
+import os, json, pickle, csv, time, logging
 
 import numpy as np
 import os.path as op
@@ -186,7 +186,7 @@ def cal_duij(R, i, j):
     intervals = np.array(map(lambda r:r.x, Rp))
     return np.sum(intervals / np.log2(2 + counts)) / np.sum(1. / np.log2(2 + counts))
         
-def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2", "PIMF"), is_test = False):
+def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2", "PIMF"), is_test=False):
     logger = get_logger(__name__)
     
     if not op.exists(base_file_path):
@@ -196,7 +196,7 @@ def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2
     delta_t = 20
     table = data['table']
     event_types = data['event_types']
-    pickle.dump(table, open(op.join(base_file_path, 'table'),'w'))
+    pickle.dump(table, open(op.join(base_file_path, 'table'), 'w'))
     logger.info('table dumped')
     print 'table dumped'
        
@@ -232,7 +232,7 @@ def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2
     
     # generate utility matrix
     utility = np.zeros((len(table), len(event_types)))
-    for cid,c_data in table.iteritems():
+    for cid, c_data in table.iteritems():
         events = [e[1] for e in c_data['events']]
         count = Counter(events)
         for k in count:
@@ -278,10 +278,10 @@ def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2
                     denominator = users_count + same_company_count
                     numerator = np.dot(duijs, sim)
                     if np.isnan(denominator) or np.isnan(numerator) or np.abs(denominator) < 1e-10:
-                        logger.error("msg u:{}\ni:{}\n\j:{}\nduijs:{}\n".format(u,i,j,str(duijs)))
+                        logger.error("msg u:{}\ni:{}\n\j:{}\nduijs:{}\n".format(u, i, j, str(duijs)))
                         raise Exception("find a nan")
                         
-                    dp[(u, i, j)] = numerator/ denominator
+                    dp[(u, i, j)] = numerator / denominator
                         
         print 'd complete {}%'.format(int(cur * 1. / users_count * 100))
         logger.info('d complete {}%'.format(int(cur * 1. / users_count * 100)))
@@ -291,12 +291,101 @@ def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2
     pickle.dump(dp, open(op.join(base_file_path, 'dp'), 'w'))
     return dp
         
-
+def generate_PIMF_data2(data, base_file_path=op.join("..", "..", "output", "data2", "PIMF")):
+    logger = get_logger(__name__)
+    
+    if not op.exists(base_file_path):
+        os.makedirs(base_file_path)
+        
+    output_col_map = op.join(base_file_path, 'column_map.csv')
+    delta_t = 20
+    table = data['table']
+    event_types = data['event_types']
+    pickle.dump(table, open(op.join(base_file_path, 'table'), 'w'))
+    logger.info('table dumped')
+    print 'table dumped'
+       
+    event_types.sort()
+    col_names = []
+    col_num_name_map = {}
+    col_num = 0
+    with open(output_col_map, 'w') as cmf:
+        writer = csv.writer(cmf, delimiter=',')
+        writer.writerow(['Column Number', 'Column Name'])
+        for i in range(0, len(event_types)):
+            for j in range(0, len(event_types)):
+                col_name = event_types[i] + '@' + event_types[j]
+                col_names.append(col_name)
+                col_num_name_map[col_name] = col_num
+                writer.writerow([col_num, col_name])
+                col_num += 1
+                
+    # generate col(event) map
+    event_types_map = dict()
+    for i in xrange(len(event_types)):
+        event_types_map[event_types[i]] = i
+    pickle.dump(event_types_map, open(op.join(base_file_path, 'event_map'), 'w'))  
+    events_count = len(event_types_map)
+    
+    # generate row map
+    row_map = dict()
+    row_idx = 0
+    for cid in table.iterkeys():
+        row_map[cid] = row_idx
+        row_idx += 1
+    pickle.dump(row_map, open(op.join(base_file_path, 'user_map'), 'w'))
+    logger.info("user map dumped")
+    users_count = len(row_map)
+    
+    # generate utility matrix
+    utility = np.zeros((users_count, events_count))
+    for cid, c_data in table.iteritems():
+        events = [e[1] for e in c_data['events']]
+        count = Counter(events)
+        for k in count:
+            utility[row_map[cid], event_types_map[k]] = count[k]
+    np.savetxt(op.join(base_file_path, 'utility'), utility)
+    logger.info("utility matrix dumped")
+    
+    # generate d(u,i,j)
+    # d = {(u,i,j):duij}
+    d = np.zeros((users_count, events_count, events_count))
+    cur = 0
+    for cid, c_data in table.iteritems():
+        R = generate_R(c_data['events'], delta_t)
+        events = set([e[1] for e in c_data['events']])
+        for e in events:
+            for e2 in events:
+                duij = cal_duij(R, e, e2)
+                if duij:
+                    d[row_map[cid], event_types_map[e], event_types_map[e2]] = duij
+                    # d[cid][(event_types_map[e], event_types_map[e2])] = cal_duij(R, e, e2)
+                    # d[cid][(e, e2)] = cal_duij(R, e, e2)
+        print 'd complete {}%'.format(int(cur * 1. / users_count * 100))
+        logger.info('d complete {}%'.format(int(cur * 1. / users_count * 100)))
+        cur += 1
+    
+    C = np.zeros((len(row_map),len(row_map)))
+    for u1 in table.iterkeys():
+        for u2 in table.iterkeys():
+            if table[u1]['company'] == table[u1]['company']:
+                C[row_map[u1],row_map[u2]] = 2
+            else:
+                C[row_map[u1],row_map[u2]] = 1
+    C = C/C.sum(1)[:,None]
+    logger.info('C computed')
+    # generate dp(u,i,j)    
+    dp = np.tensordot(C, d, ([1],[0]))
+    logger.info('dp computed')
+    
+    del d            
+    pickle.dump(dp, open(op.join(base_file_path, 'dp'), 'w'))
+    return dp
 if __name__ == '__main__':
 #     d = dict()
 #     d['table'] = {'jkdajfakjsdklfj':{'events':[(1, 'c'), (8, 'd'), (13, 'b'), (16, 'e'), (18, 'b'), (22, 'a')]}}
     generate_PIMF_data(read_in(source_path=op.join("..", "..", "output", "data2", "original", 'simpleB.csv')),
-                        base_file_path=op.join("..","..","output","data2","validate","pimf"))
+                        base_file_path=op.join("..", "..", "output", "data2", "validate", "pimf"))
 #     R = generate_R([(1, 'c'), (8, 'd'), (13, 'b'), (16, 'e'), (18, 'b'), (22, 'a')], 20)
 #     for i in ['a','b','c','d','e']:
 #         for j in ['a','b','c','d','e']:

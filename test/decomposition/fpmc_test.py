@@ -1,4 +1,4 @@
-import unittest,datetime,pickle
+import unittest, datetime, pickle
 import numpy as np
 import os.path as op
 from src.decomposition.fpmc import FPMC 
@@ -7,11 +7,11 @@ from src.decomposition.fpmc import FPMC
 class FPMC_Test(unittest.TestCase):
 
 	def test(self):
-		data = pickle.load(open(op.join('..','..','output','fpmc_data','training','data'), 'r'))
+		data = pickle.load(open(op.join('..', '..', 'output', 'fpmc_data', 'training', 'data'), 'r'))
 		fpmc = FPMC()
-		(vui,viu,vil,vli) = fpmc.factorize(data, 50, 50, .2, .5)
+		(vui, viu, vil, vli) = fpmc.factorize(data, 50, 50, .2, .5)
 		
-		out_path = op.join('..','..','output','fpmc_data','training')
+		out_path = op.join('..', '..', 'output', 'fpmc_data', 'training')
 # 		np.savetxt(op.join(out_path,'vui'), vui)
 # 		np.savetxt(op.join(out_path,'viu'), viu)
 # 		np.savetxt(op.join(out_path,'vil'), vil)
@@ -19,7 +19,7 @@ class FPMC_Test(unittest.TestCase):
 		print 'start cal a'
 		fpmc.cal_a()
 		print 'end cal a'
-		#pickle.dump(fpmc.a, open(op.join(out_path,'a'), 'w'))
+		# pickle.dump(fpmc.a, open(op.join(out_path,'a'), 'w'))
 
 
 if __name__ == "__main__":
