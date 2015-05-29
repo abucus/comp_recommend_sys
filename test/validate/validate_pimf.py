@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
 
 
     def testPIMF(self):
-        base_path = op.join('..', '..', 'output', 'data', 'validate', 'pimf')
+        base_path = op.join('..', '..', 'output', 'data3', 'validate', 'pimf')
         pimf = PIMF(op.join(base_path, 'training'), k=50, mu=2)
         test_data = pickle.load(open(op.join(base_path, 'test', 'table'), 'r'))
         event_map = pickle.load(open(op.join(base_path, 'test', 'event_map'), 'r'))
@@ -31,7 +31,7 @@ class Test(unittest.TestCase):
         validate_data_path = op.join(base_path, 'test')
         pimf_true = PIMF(validate_data_path, k=50, mu=2)
         
-        for k in [3, 5, 10]:
+        for k in [3, 5, 10, 20, 40]:
             precisions = []
             recalls = []
             ndcgs = []

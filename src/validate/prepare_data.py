@@ -64,4 +64,4 @@ def prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data
     generate_PIMF_data2(test_data, test_output)
     
 if __name__ == '__main__':
-    prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data", "original", 'simpleA2.csv'), out_path=op.join("..", "..", "output", "data", "validate", "pimf"))
+    prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data3", "original", 'simpleC.csv'), out_path=op.join("..", "..", "output", "data3", "validate", "pimf"))
