@@ -5,7 +5,7 @@ Created on Feb 12, 2015
 '''
 import os.path as op
 import os
-from src.input.read_csv import read_in, generate_file, generate_PIMF_data,\
+from src.input.read_csv import read_in, generate_file, generate_PIMF_data, \
     generate_PIMF_data2
 
 def prepare_general_validation_data():
@@ -64,4 +64,4 @@ def prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data
     generate_PIMF_data2(test_data, test_output)
     
 if __name__ == '__main__':
-    prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data3", "original", 'simpleC.csv'), out_path=op.join("..", "..", "output", "data3", "validate", "pimf"))
+    prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data2", "original", 'simpleB.csv'), out_path=op.join("..", "..", "output", "data2", "validate", "pimf"))

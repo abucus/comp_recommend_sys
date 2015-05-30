@@ -198,7 +198,6 @@ def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2
     event_types = data['event_types']
     pickle.dump(table, open(op.join(base_file_path, 'table'), 'w'))
     logger.info('table dumped')
-    print 'table dumped'
        
     event_types.sort()
     col_names = []
@@ -258,7 +257,6 @@ def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2
                     d[(cid, event_types_map[e], event_types_map[e2])] = cal_duij(R, e, e2)
                     # d[cid][(event_types_map[e], event_types_map[e2])] = cal_duij(R, e, e2)
                     # d[cid][(e, e2)] = cal_duij(R, e, e2)
-        print 'd complete {}%'.format(int(cur * 1. / total * 100))
         logger.info('d complete {}%'.format(int(cur * 1. / total * 100)))
         cur += 1
     
@@ -283,7 +281,6 @@ def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2
                         
                     dp[(u, i, j)] = numerator / denominator
                         
-        print 'd complete {}%'.format(int(cur * 1. / users_count * 100))
         logger.info('d complete {}%'.format(int(cur * 1. / users_count * 100)))
         cur += 1
         
@@ -303,7 +300,6 @@ def generate_PIMF_data2(data, base_file_path=op.join("..", "..", "output", "data
     event_types = data['event_types']
     pickle.dump(table, open(op.join(base_file_path, 'table'), 'w'))
     logger.info('table dumped')
-    print 'table dumped'
        
     event_types.sort()
     col_names = []
@@ -361,21 +357,20 @@ def generate_PIMF_data2(data, base_file_path=op.join("..", "..", "output", "data
                     d[row_map[cid], event_types_map[e], event_types_map[e2]] = duij
                     # d[cid][(event_types_map[e], event_types_map[e2])] = cal_duij(R, e, e2)
                     # d[cid][(e, e2)] = cal_duij(R, e, e2)
-        print 'd complete {}%'.format(int(cur * 1. / users_count * 100))
         logger.info('d complete {}%'.format(int(cur * 1. / users_count * 100)))
         cur += 1
     
-    C = np.zeros((len(row_map),len(row_map)))
+    C = np.zeros((len(row_map), len(row_map)))
     for u1 in table.iterkeys():
         for u2 in table.iterkeys():
             if table[u1]['company'] == table[u1]['company']:
-                C[row_map[u1],row_map[u2]] = 2
+                C[row_map[u1], row_map[u2]] = 2
             else:
-                C[row_map[u1],row_map[u2]] = 1
-    C = C/C.sum(1)[:,None]
+                C[row_map[u1], row_map[u2]] = 1
+    C = C / C.sum(1)[:, None]
     logger.info('C computed')
     # generate dp(u,i,j)    
-    dp = np.tensordot(C, d, ([1],[0]))
+    dp = np.tensordot(C, d, ([1], [0]))
     logger.info('dp computed')
     
     del d            

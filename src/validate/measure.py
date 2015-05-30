@@ -82,8 +82,8 @@ class Measure:
             return None
         
         pack0 = zip(train_score, true_score)
-        pack = [x for x in pack0 if x[1]>0]
-        if len(pack)<self.ndcg_k:
+        pack = [x for x in pack0 if x[1] > 0]
+        if len(pack) < self.ndcg_k:
             return None
         
         pack.sort(key=lambda l:l[0], reverse=True)
@@ -93,7 +93,7 @@ class Measure:
         dcg = self.__cal_dcg(score) 
         idcg = self.__cal_dcg(sorted(score, reverse=True))
         
-        return dcg / (idcg+np.spacing(0))
+        return dcg / (idcg + np.spacing(0))
             
     def __cal_dcg(self, score):
         result = score[0]
@@ -102,7 +102,7 @@ class Measure:
         return result
     
     def __normalize(self, scores):
-        return (scores-np.min(scores))/(np.max(scores) - np.min(scores) + np.spacing(0))
+        return (scores - np.min(scores)) / (np.max(scores) - np.min(scores) + np.spacing(0))
 
 def flattern_fpmc_matrix(a):
     user_num, item_num = a.shape[0], a.shape[1]
@@ -113,10 +113,10 @@ def flattern_fpmc_matrix(a):
     return m
 
 if __name__ == "__main__":
-    R_hat = np.loadtxt(op.join("..","..","output", "data2", "validate", "nmf3", "149", "WH.txt"))
-    R_test =  np.loadtxt(op.join("..","..","output", "data2", "validate", "test", "pure_matrix.csv"),delimiter=',')
-    m = Measure(R_hat,R_test)
-    print m.ndcg(3),m.ndcg(5),m.ndcg(10)
+    R_hat = np.loadtxt(op.join("..", "..", "output", "data2", "validate", "nmf3", "129", "WH.txt"))
+    R_test = np.loadtxt(op.join("..", "..", "output", "data2", "validate", "test", "pure_matrix.csv"), delimiter=',')
+    m = Measure(R_hat, R_test)
+    print 'ndcg@{}:{},{}:{},{}:{}'.format(3,m.ndcg(3),5,m.ndcg(5),10,m.ndcg(10))
 #     a = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
 #     print a.shape
 #     print flattern_fpmc_matrix(a)

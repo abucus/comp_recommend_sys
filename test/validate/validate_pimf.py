@@ -28,16 +28,13 @@ class Test(unittest.TestCase):
         total_recall = []
         total_ndcg = []
         
-        validate_data_path = op.join(base_path, 'test')
-        pimf_true = PIMF(validate_data_path, k=50, mu=2)
-        
         for k in [3, 5, 10, 20, 40]:
             precisions = []
             recalls = []
             ndcgs = []
             for u, u_data in test_data.iteritems():
                 if len(u_data['events']) > 0:
-                    relevant = np.array([event_map[e[1]] for e in u_data['events']])[:k]
+                    relevant = np.array([event_map[e[1]] for e in u_data['events']])
                     t = u_data['events'][0][0]
                     
                     recommend = pimf.predict(u, t, k)
@@ -46,8 +43,9 @@ class Test(unittest.TestCase):
                     pr = precision_recall(recommend, relevant)
                     precisions.append(pr[0])
                     recalls.append(pr[1])
-                    
-                    scores = np.array([pimf_true.purchae_prob(u, t, i) for i in recommend])
+                    # a 17.41 b 19.49 c16.88 days    
+                    event_scores = [(event_map[e[1]], np.exp(-(e[0] - t).total_seconds() / 3600. / 24. / 16.88), pimf.purchae_prob(u, t, e[1])) for e in u_data['events']]
+                    scores = np.array(map(lambda x: x[1], sorted(event_scores, key=lambda x:x[2])))
                     ndcgs.append(ndcg(scores))
             total_precision.append((k, np.mean(precisions)))
             total_recall.append((k, np.mean(recalls))) 

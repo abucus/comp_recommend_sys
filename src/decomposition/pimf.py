@@ -61,7 +61,7 @@ class PIMF(object):
         t the time stamp to predict
         k the number of predictions
         '''
-        self.logger.info('predict for u{} t{} event_num{}'.format(u, t, self.event_num))
+        self.logger.debug('predict for u{} t{} event_num{}'.format(u, t, self.event_num))
         probs = np.zeros((self.event_num,))
         for i in xrange(self.event_num):
             probs[i] = self.__cal_purchae_prob(u, i, t)
@@ -89,19 +89,19 @@ class PIMF(object):
         for e in events:
             tj = e[0]
             ej = self.event_map[e[1]]
-            #v = 1. / np.log2(np.abs(cal_interval_in_days(tj, t) - self.dp.get((u, ej, i), 0)) + 2)
-            v = 1. / np.log2(np.abs(cal_interval_in_days(tj, t) - self.dp[self.user_map[u],ej,i] + 2))
+            # v = 1. / np.log2(np.abs(cal_interval_in_days(tj, t) - self.dp.get((u, ej, i), 0)) + 2)
+            v = 1. / np.log2(np.abs(cal_interval_in_days(tj, t) - self.dp[self.user_map[u], ej, i] + 2))
             piuij.append(v)
         
         rlt = np.max(piuij)
-        self.logger.info('computed the max pi_uij for u:{}, i:{}, t:{}'.format(u, i, t))
-        self.logger.info('pi_uij:{}'.format(piuij))
-        self.logger.info('max:{}'.format(rlt))
+        self.logger.debug('computed the max pi_uij for u:{}, i:{}, t:{}'.format(u, i, t))
+        self.logger.debug('pi_uij:{}'.format(piuij))
+        self.logger.debug('max:{}'.format(rlt))
         return rlt
         
     def __cal_purchae_prob(self, u, i, t):
-        self.logger.info('cal purchase prob u{} i{} t{}'.format(u, i, t))
+        self.logger.debug('cal purchase prob u{} i{} t{}'.format(u, i, t))
         rlt = 1. / (1 + np.exp(-1.*self.__cal_us(u, i, t)))
-        self.logger.info('computed prob for user:{},i:{},t:{} is {}'.format(u, i, t, rlt))
+        self.logger.debug('computed prob for user:{},i:{},t:{} is {}'.format(u, i, t, rlt))
         return rlt
         
