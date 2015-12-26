@@ -9,7 +9,7 @@ from src.input.read_csv import read_in, generate_file, generate_PIMF_data, \
     generate_PIMF_data2, read_in2
 
 def prepare_general_validation_data():
-    base_path = op.join("..", "..", "output", "data2", "validate")
+    base_path = op.join("..", "..", "output", "data3", "validate")
     training_output = op.join(base_path, "training") 
     test_output = op.join(base_path, "test") 
     if not op.exists(training_output):
@@ -19,7 +19,7 @@ def prepare_general_validation_data():
     
     training_data_ratio = .65
     
-    training_data = read_in(source_path=op.join("..", "..", "output", "data2", "original", 'simpleB.csv'))
+    training_data = read_in(source_path="E:\\local_repo\\comp_recommend_sys\\output\\data3\\original\\simpleC.csv")
     test_data = {'event_types':training_data['event_types'], 'table':{}}
     test_table = test_data['table']
     training_table = training_data['table']
@@ -64,4 +64,5 @@ def prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data
     generate_PIMF_data2(test_data, test_output)
     
 if __name__ == '__main__':
-    prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data4", 'Gowalla_Manhattan_Checkins_sim.txt'), out_path=op.join("..", "..", "output", "data4", "go"))
+    #prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data4", 'Gowalla_Manhattan_Checkins_sim.txt'), out_path=op.join("..", "..", "output", "data4", "go"))
+    prepare_general_validation_data()

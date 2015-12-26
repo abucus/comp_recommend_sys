@@ -42,7 +42,7 @@ def read_in(source_path=op.join("..", "..", "output", "data2", "original", 'smal
 def generate_file(data, base_file_path=op.join("..", "..", "output", "data")):
     table = data['table']
     event_types = data['event_types']
-    
+    print op.abspath(base_file_path)
     output_pure_matrix = op.join(base_file_path, 'pure_matrix.csv')
     output_full_matrix = op.join(base_file_path, 'full_matrix.csv')
     output_col_map = op.join(base_file_path, 'column_map.csv')
