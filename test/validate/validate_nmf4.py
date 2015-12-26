@@ -10,10 +10,11 @@ from pandas import DataFrame;
 from src.decomposition.nmf_4 import NMF4
 from src.validate.measure import Measure
 
-ks = np.arange(10, 70, 10);
+ks = np.arange(10,70,20)
 _lambdas = [10 ** i for i in np.arange(-4, 4)]
 lambda_as = [10 ** i for i in np.arange(-4, 4)]
 lambda_bs = [10 ** i for i in np.arange(-4, 4)]
+total = len(ks)*len(_lambdas)*len(lambda_as)*len(lambda_bs)
 base_path = op.join("..", "..", "output")
 
 for data in ["data", "data2"]:    
@@ -44,8 +45,8 @@ for data in ["data", "data2"]:
                     m = Measure(WH, R_test)
                     precision_recall = zip(*[m.precision_recall(i) for i in [3, 5, 10]])
                     result.loc[idx] = [data, _lambda, lambda_a, lambda_b, k, m.ndcg(3), m.ndcg(5), m.ndcg(10)] + list(precision_recall[0]) + list(precision_recall[1])
-                    
                     idx += 1
+                    print "###### progress", 100.*idx/total, "% on", data, "#####"
                     del WInit,HInit, W,H,nmf,m
                     
     result.to_csv(op.join(output_path, "result.csv"), index=False)
