@@ -11,9 +11,9 @@ from src.decomposition.nmf_4 import NMF4
 from src.validate.measure import Measure
 
 ks = np.arange(10, 70, 10);
-_lambdas = np.arange([10 ** i for i in np.arange(-4, 4)])
-lambda_as = np.arange([10 ** i for i in np.arange(-4, 4)])
-lambda_bs = np.arange([10 ** i for i in np.arange(-4, 4)])
+_lambdas = [10 ** i for i in np.arange(-4, 4)]
+lambda_as = [10 ** i for i in np.arange(-4, 4)]
+lambda_bs = [10 ** i for i in np.arange(-4, 4)]
 base_path = op.join("..", "..", "output")
 
 for data in ["data", "data2"]:    
