@@ -6,7 +6,7 @@ Created on Feb 12, 2015
 import os.path as op
 import os
 from src.input.read_csv import read_in, generate_file, generate_PIMF_data, \
-    generate_PIMF_data2
+    generate_PIMF_data2, read_in2
 
 def prepare_general_validation_data():
     base_path = op.join("..", "..", "output", "data2", "validate")
@@ -45,9 +45,9 @@ def prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data
     if not op.exists(test_output):
         os.makedirs(test_output) 
     
-    training_data_ratio = .65
+    training_data_ratio = .8
     
-    training_data = read_in(source_path)
+    training_data = read_in2(source_path)
     test_data = {'event_types':training_data['event_types'], 'table':{}}
     test_table = test_data['table']
     training_table = training_data['table']
@@ -64,4 +64,4 @@ def prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data
     generate_PIMF_data2(test_data, test_output)
     
 if __name__ == '__main__':
-    prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data2", "original", 'simpleB.csv'), out_path=op.join("..", "..", "output", "data2", "validate", "pimf"))
+    prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data4", 'Gowalla_Manhattan_Checkins_sim.txt'), out_path=op.join("..", "..", "output", "data4", "go"))

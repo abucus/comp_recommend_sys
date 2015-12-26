@@ -6,7 +6,7 @@ Created on Feb 7, 2015
 import unittest, datetime
 import numpy as np
 import os.path as op
-from src.decomposition.nmf_3_2 import NMF3 
+from src.decomposition.nmf_4 import NMF4
 
 
 class Test(unittest.TestCase):
@@ -30,19 +30,18 @@ class Test(unittest.TestCase):
 
     def test_my_nmf(self):
         V, C = self.V, self.C
-        my_nmf = NMF3()
+        my_nmf = NMF4()
         time_cost = []
         start = datetime.datetime.now()
-        
-        W_init = np.random.normal(0, 1, (V.shape[0], 20))
-        H_init = np.random.normal(0, 1, (20, V.shape[1]))
-        (W, H) = my_nmf.factorize(V, C, W_init, H_init)
+        W_init = np.random.uniform(1, 2, (V.shape[0], 20))
+        H_init = np.random.uniform(1, 2, (20, V.shape[1]))
+        (W, H) = my_nmf.factorize(V, C, 20)
         time_cost.append({'k':20, 'time':(datetime.datetime.now() - start).total_seconds()})
         print time_cost
 
         # (W, H) = my_nmf.factorize(V, self.init_W, self.init_H, 100)
-        np.savetxt("my_nmf_W.txt", W)
-        np.savetxt("my_nmf_H.txt", H)
+        np.savetxt("my_nmf4_W.txt", W)
+        np.savetxt("my_nmf4_H.txt", H)
 
 
 if __name__ == "__main__":

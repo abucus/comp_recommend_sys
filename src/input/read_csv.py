@@ -376,11 +376,39 @@ def generate_PIMF_data2(data, base_file_path=op.join("..", "..", "output", "data
     del d            
     pickle.dump(dp, open(op.join(base_file_path, 'dp'), 'w'))
     return dp
+def read_in2(source_path=op.join("..", "..", "output", "data2", "original", 'small.csv')):
+    '''
+    Read in all data and organize in a map like
+    {'id1':[(time1,event_type1),(time2,event_type2)]} the event sequence is ordered by date-time
+    '''
+    id_column = 0
+    time_column = 1
+    event_type_column = 2
+    with open(source_path) as cf:
+        reader = csv.reader(cf, delimiter=',')
+        reader.next()
+        table = {}
+        event_types = []
+        date_format = '%Y-%m-%d %H:%M:%S'
+        for row in reader:
+            cid = row[id_column]
+            if(cid not in table):
+                company = ''
+                table[cid] = {'company':company, 'events':[]}
+            table[cid]['events'].append((datetime.strptime(row[time_column], date_format), row[event_type_column]))
+            if(row[event_type_column] not in event_types):
+                event_types.append(row[event_type_column])
+        
+        for v in table.itervalues():
+            v['events'].sort(key=lambda l:l[0])
+            
+    # print "event_types:#", len(event_types), "\n", event_types
+    return {'event_types':event_types, 'table':table, 'users':table.keys()} 
 if __name__ == '__main__':
 #     d = dict()
 #     d['table'] = {'jkdajfakjsdklfj':{'events':[(1, 'c'), (8, 'd'), (13, 'b'), (16, 'e'), (18, 'b'), (22, 'a')]}}
-    generate_PIMF_data(read_in(source_path=op.join("..", "..", "output", "data2", "original", 'simpleB.csv')),
-                        base_file_path=op.join("..", "..", "output", "data2", "validate", "pimf"))
+    generate_PIMF_data2(read_in2(source_path=op.join("..", "..", "output", "data4", 'Gowalla_Manhattan_Checkins_sim.txt')),
+                        base_file_path=op.join("..", "..", "output", "data4", 'go'))
 #     R = generate_R([(1, 'c'), (8, 'd'), (13, 'b'), (16, 'e'), (18, 'b'), (22, 'a')], 20)
 #     for i in ['a','b','c','d','e']:
 #         for j in ['a','b','c','d','e']:

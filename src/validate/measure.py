@@ -48,7 +48,7 @@ class Measure:
                     total_precision += tmp_rlt[0]
                     total_recall += tmp_rlt[1]
                     count += 1
-        return (total_precision / count, total_recall / count)
+        return [total_precision / count, total_recall / count]
     
     def __cal_precision_recall(self, train_score, true_score):
         # print "in __cal_precision_recall",train_score,true_score
