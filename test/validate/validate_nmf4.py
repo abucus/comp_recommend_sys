@@ -10,10 +10,10 @@ from pandas import DataFrame;
 from src.decomposition.nmf_4 import NMF4
 from src.validate.measure import Measure
 
-ks = [10]#np.arange(10, 70, 10);
-_lambdas = [1,2]#np.arange([10 ** i for i in xrange(-5, 5)])
-lambda_as = [1,2]#np.arange([10 ** i for i in xrange(-5, 5)])
-lambda_bs = [1,2]#np.arange([10 ** i for i in xrange(-5, 5)])
+ks = np.arange(10, 70, 10);
+_lambdas = np.arange([10 ** i for i in xrange(-4, 4)])
+lambda_as = np.arange([10 ** i for i in xrange(-4, 4)])
+lambda_bs = np.arange([10 ** i for i in xrange(-4, 4)])
 base_path = op.join("..", "..", "output")
 
 for data in ["data", "data2"]:    
@@ -46,6 +46,7 @@ for data in ["data", "data2"]:
                     result.loc[idx] = [data, _lambda, lambda_a, lambda_b, k, m.ndcg(3), m.ndcg(5), m.ndcg(10)] + list(precision_recall[0]) + list(precision_recall[1])
                     
                     idx += 1
+                    del WInit,HInit, W,H,nmf,m
                     
     result.to_csv(op.join(output_path, "result.csv"), index=False)
                 
