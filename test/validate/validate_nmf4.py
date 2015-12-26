@@ -17,7 +17,7 @@ lambda_bs = [10 ** i for i in np.arange(-4, 4)]
 total = len(ks)*len(_lambdas)*len(lambda_as)*len(lambda_bs)
 base_path = op.join("..", "..", "output")
 
-for data in ["data", "data2", "data3"]:
+for data in ["data3", "data2", "data"]:
     V = np.loadtxt(op.join(base_path, data, "validate", "training", "pure_matrix.csv"), delimiter=",")
     C = np.loadtxt(op.join(base_path, data, "validate", "training", "company_matrix"))
     R_test = np.loadtxt(op.join(base_path, data, "validate", "test", "pure_matrix.csv"), delimiter=",")
@@ -48,7 +48,6 @@ for data in ["data", "data2", "data3"]:
                     idx += 1
                     print "###### progress", 100.*idx/total, "% on", data, "#####"
                     del WInit,HInit, W,H,nmf,m
-                    
-    result.to_csv(op.join(output_path, "result.csv"), index=False)
+                    result.to_csv(op.join(output_path, "result.csv"), index=False)
                 
                 # Measure m = Meas
