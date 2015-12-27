@@ -17,7 +17,7 @@ lambda_bs = [10 ** i for i in np.arange(-4, 4)]
 total = len(ks)*len(_lambdas)*len(lambda_as)*len(lambda_bs)
 base_path = op.join("..", "..", "output")
 
-for data in ["data3", "data2", "data"]:
+for data in ["data2", "data3", "data"]:
     V = np.loadtxt(op.join(base_path, data, "validate", "training", "pure_matrix.csv"), delimiter=",")
     C = np.loadtxt(op.join(base_path, data, "validate", "training", "company_matrix"))
     R_test = np.loadtxt(op.join(base_path, data, "validate", "test", "pure_matrix.csv"), delimiter=",")
@@ -40,7 +40,7 @@ for data in ["data3", "data2", "data"]:
                     W, H = nmf.factorize(V, C, k, _lambda, lambda_a, lambda_b, WInit=WInit, HInit=HInit)
                     WH = W.dot(H)
 
-                    np.savetxt(op.join(output_path, "WH"+str(idx)+".txt"), WH)
+                    #np.savetxt(op.join(output_path, "WH"+str(idx)+".txt"), WH)
                     
                     m = Measure(WH, R_test)
                     precision_recall = zip(*[m.precision_recall(i) for i in [3, 5, 10]])
