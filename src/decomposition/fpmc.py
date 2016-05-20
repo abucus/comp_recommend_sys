@@ -9,8 +9,8 @@ class FPMC:
 	def factorize(self, data, kui, kil, alpha, lambda_):
 		self.data = data
 		lambda_ui = lambda_iu = lambda_li = lambda_il = lambda_
-		print 'begin fpmc\n', 'u_num:', data['u_num'], '\n', 'i_num:', data['i_num'], '\n', \
-		'kui', kui, '\n', 'kil', kil
+		print('begin fpmc\n', 'u_num:', data['u_num'], '\n', 'i_num:', data['i_num'], '\n', \
+		'kui', kui, '\n', 'kil', kil)
 
 		sigma = .2
 		vui = self.vui = np.random.normal(0, sigma, (data['u_num'], kui))
@@ -18,7 +18,7 @@ class FPMC:
 		vil = self.vil = np.random.normal(0, sigma, (data['i_num'], kil))
 		vli = self.vli = np.random.normal(0, sigma, (data['i_num'], kil))
 
-		print max(data['u_num'], data['i_num']) * 30
+		print(max(data['u_num'], data['i_num']) * 30)
 		for it in range(max(data['u_num'], data['i_num']) * 30):
 			u = np.random.randint(0, data['u_num'])
 			t = np.random.randint(1, len(data['transactions'][u]))

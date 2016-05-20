@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
             precisions = []
             recalls = []
             ndcgs = []
-            for u, u_data in test_data.iteritems():
+            for u, u_data in test_data.items():
                 if len(u_data['events']) > 0:
                     relevant = np.array([event_map[e[1]] for e in u_data['events']])
                     t = u_data['events'][0][0]
@@ -45,7 +45,7 @@ class Test(unittest.TestCase):
                     recalls.append(pr[1])
                     # a 17.41 b 19.49 c16.88 days    
                     event_scores = [(event_map[e[1]], np.exp(-(e[0] - t).total_seconds() / 3600. / 24. / 16.88), pimf.purchae_prob(u, t, e[1])) for e in u_data['events']]
-                    scores = np.array(map(lambda x: x[1], sorted(event_scores, key=lambda x:x[2])))
+                    scores = np.array([x[1] for x in sorted(event_scores, key=lambda x:x[2])])
                     ndcgs.append(ndcg(scores))
             total_precision.append((k, np.mean(precisions)))
             total_recall.append((k, np.mean(recalls))) 

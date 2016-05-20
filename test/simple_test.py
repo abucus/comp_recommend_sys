@@ -14,7 +14,7 @@ with open(matrix_path, "r") as rf:
         count_minus_1 = count_0 = count_non_0 = 0
         avg_list = []
         reader = csv.reader(rf, delimiter=",")
-        reader.next()
+        next(reader)
         writer = csv.writer(wf, delimiter=",")
         for row in reader:
             cId = row[0]
@@ -36,9 +36,9 @@ with open(matrix_path, "r") as rf:
                 avg = 0
             writer.writerow([cId, avg])
             avg_list.append(avg)
-        print "-1:", count_minus_1
-        print " 0:", count_0
-        print " +:", count_non_0
-        print " total_customer:", len(avg_list)
+        print("-1:", count_minus_1)
+        print(" 0:", count_0)
+        print(" +:", count_non_0)
+        print(" total_customer:", len(avg_list))
         plt.hist(avg_list)
         plt.show()

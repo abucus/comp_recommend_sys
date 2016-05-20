@@ -21,11 +21,11 @@ def nmf(V, Winit, Hinit, tol, timelimit, maxiter):
  gradW = dot(W, dot(H, H.T)) - dot(V, H.T)
  gradH = dot(dot(W.T, W), H) - dot(W.T, V)
  initgrad = norm(r_[gradW, gradH.T])
- print 'Init gradient norm %f' % initgrad 
+ print('Init gradient norm %f' % initgrad) 
  tolW = max(0.001, tol) * initgrad
  tolH = tolW
 
- for iter in xrange(1, maxiter):
+ for iter in range(1, maxiter):
   # stopping condition
   projnorm = norm(r_[gradW[logical_or(gradW < 0, W > 0)],
                                  gradH[logical_or(gradH < 0, H > 0)]])
@@ -42,7 +42,7 @@ def nmf(V, Winit, Hinit, tol, timelimit, maxiter):
 
   if iter % 10 == 0: stdout.write('.')
 
- print '\nIter = %d Final proj-grad norm %f' % (iter, projnorm)
+ print('\nIter = %d Final proj-grad norm %f' % (iter, projnorm))
  return (W, H)
 
 def nlssubprob(V, W, Hinit, tol, maxiter):
@@ -60,13 +60,13 @@ def nlssubprob(V, W, Hinit, tol, maxiter):
  WtW = dot(W.T, W) 
 
  alpha = 1; beta = 0.1;
- for iter in xrange(1, maxiter):  
+ for iter in range(1, maxiter):  
   grad = dot(WtW, H) - WtV
   projgrad = norm(grad[logical_or(grad < 0, H > 0)])
   if projgrad < tol: break
 
   # search step size 
-  for inner_iter in xrange(1, 20):
+  for inner_iter in range(1, 20):
    Hn = H - alpha * grad
    Hn = where(Hn > 0, Hn, 0)
    d = Hn - H
@@ -87,5 +87,5 @@ def nlssubprob(V, W, Hinit, tol, maxiter):
        alpha = alpha / beta; Hp = Hn;
 
   if iter == maxiter:
-   print 'Max iter in nlssubprob'
+   print('Max iter in nlssubprob')
  return (H, grad, iter)

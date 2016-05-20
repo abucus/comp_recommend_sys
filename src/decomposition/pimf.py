@@ -63,7 +63,7 @@ class PIMF(object):
         '''
         self.logger.debug('predict for u{} t{} event_num{}'.format(u, t, self.event_num))
         probs = np.zeros((self.event_num,))
-        for i in xrange(self.event_num):
+        for i in range(self.event_num):
             probs[i] = self.__cal_purchae_prob(u, i, t)
         # return probs[-k:][::-1]
         return np.argsort(probs)[-k:][::-1]

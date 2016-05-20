@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
         H_init = np.random.uniform(1, 2, (20, V.shape[1]))
         (W, H) = my_nmf.factorize(V, C, 20)
         time_cost.append({'k':20, 'time':(datetime.datetime.now() - start).total_seconds()})
-        print time_cost
+        print(time_cost)
 
         # (W, H) = my_nmf.factorize(V, self.init_W, self.init_H, 100)
         np.savetxt("my_nmf4_W.txt", W)

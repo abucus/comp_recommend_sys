@@ -40,9 +40,9 @@ class Validator(object):
         self.test_V = np.loadtxt(op.join(self.input_path, "test", "pure_matrix.csv"), delimiter=",")
         self.I = np.where(self.test_V > 0, 1, 0)
         self.non_zero_count = self.I.sum()
-        print "****** validator init done ******" \
+        print("****** validator init done ******" \
         "\noutput_count:", self.output_count, \
-        "\ninput_path:", self.input_path
+        "\ninput_path:", self.input_path)
     
     def validate(self, r, _lambda=None):
         
@@ -55,10 +55,10 @@ class Validator(object):
 #             initH = self.initH
         initW = self.initW = np.random.random_sample((self.training_V.shape[0], r))
         initH = self.initH = np.random.random_sample((r, self.training_V.shape[1]))
-        print "****** init W,H done ******" \
+        print("****** init W,H done ******" \
         "\nV shape:", self.training_V.shape, \
         "\ninit W shape:", initW.shape, \
-        "\ninit H shape:", initH.shape
+        "\ninit H shape:", initH.shape)
         
         if _lambda:
             (W, H) = self.nmf.factorize(self.training_V, self.C, initW, initH, _lambda)

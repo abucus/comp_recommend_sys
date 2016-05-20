@@ -33,12 +33,12 @@ class Test(unittest.TestCase):
 #             abs_sum += v
 #             square_sum += v**2
         if op.exists(op.join(self.output_path, "R_hat.txt")):
-            print "load R_hat"
+            print("load R_hat")
             R_hat = np.loadtxt(op.join(self.output_path, "R_hat.txt"))
         else:
             R_hat = np.zeros(self.V_test.shape)
             for i in range(0, self.V.shape[0]):
-                print "constructing row", i, " starting time", datetime.datetime.now()
+                print("constructing row", i, " starting time", datetime.datetime.now())
                 row = self.V[i]
                 if np.any(row != 0):
                     # avg of all row elem or avg of all postive elem

@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
 
     def testNMF(self):
         for r in range(100, 400, 100):
-            print "r=", r, " calculating..."
+            print("r=", r, " calculating...")
             init_W = np.random.random_sample((self.V.shape[0], r))
             init_H = np.random.random_sample((r, self.V.shape[1]))
             (W, H) = nmf(self.V, init_W, init_H, 0.1, 100000, 2)

@@ -20,7 +20,7 @@ def read_in(source_path=op.join("..", "..", "output", "data2", "original", 'smal
     event_type_column = 3
     with open(source_path) as cf:
         reader = csv.reader(cf, delimiter=',')
-        reader.next()
+        next(reader)
         table = {}
         event_types = []
         date_format = '%Y-%m-%d %H:%M:%S.0%f'
@@ -33,16 +33,16 @@ def read_in(source_path=op.join("..", "..", "output", "data2", "original", 'smal
             if(row[event_type_column] not in event_types):
                 event_types.append(row[event_type_column])
         
-        for v in table.itervalues():
+        for v in table.values():
             v['events'].sort(key=lambda l:l[0])
             
     # print "event_types:#", len(event_types), "\n", event_types
-    return {'event_types':event_types, 'table':table, 'users':table.keys()} 
+    return {'event_types':event_types, 'table':table, 'users':list(table.keys())} 
 
 def generate_file(data, base_file_path=op.join("..", "..", "output", "data")):
     table = data['table']
     event_types = data['event_types']
-    print op.abspath(base_file_path)
+    print(op.abspath(base_file_path))
     output_pure_matrix = op.join(base_file_path, 'pure_matrix.csv')
     output_full_matrix = op.join(base_file_path, 'full_matrix.csv')
     output_col_map = op.join(base_file_path, 'column_map.csv')
@@ -51,7 +51,7 @@ def generate_file(data, base_file_path=op.join("..", "..", "output", "data")):
     # output the stat info
     total_days_interval = 0
     interval_count = 0
-    for c in table.itervalues():
+    for c in table.values():
         v = c['events']
         for i in range(len(v) - 1):
             if v[i][1] != v[i + 1][1]:
@@ -84,10 +84,10 @@ def generate_file(data, base_file_path=op.join("..", "..", "output", "data")):
     
     # generate pure matrix and write to csv    
     delta = 90
-    m = np.full((len(table.keys()), len(event_types) ** 2), 0)
+    m = np.full((len(list(table.keys())), len(event_types) ** 2), 0)
     row_names = []
     k = 0
-    for cid, record in table.iteritems():
+    for cid, record in table.items():
         row_names.append(str(cid))
         v = record['events']
         v_len = len(v)
@@ -116,9 +116,9 @@ def generate_file(data, base_file_path=op.join("..", "..", "output", "data")):
     # generate company matrix
     company_matrix = np.zeros((len(table), len(table)))  
     cur_row = 0
-    for k, v in table.iteritems():
+    for k, v in table.items():
         cur_col = 0
-        for k2, v2 in table.iteritems():
+        for k2, v2 in table.items():
             if v['company'] == v2['company']:
                 company_matrix[cur_row, cur_col] = 1
             else:
@@ -142,7 +142,7 @@ def generate_R(c_events, window=90):
         
         while len(Q) > 0 and cal_interval_in_days(Q[0].t, e.t) > window:
             ep = Q.pop(0)
-            RW = filter(lambda r: r.i != ep.id, RW)
+            RW = [r for r in RW if r.i != ep.id]
         if len(Q) > 0:
             xp = cal_interval_in_days(Q[-1].t, e.t)
             cp = 1 if xp > 0 else 0
@@ -161,8 +161,8 @@ def generate_R(c_events, window=90):
         RW = RWP
         RWP = []
         
-        Q = filter(lambda ep: ep.id != e.id, Q)
-        RW = filter(lambda r: r.i != e.id, RW)
+        Q = [ep for ep in Q if ep.id != e.id]
+        RW = [r for r in RW if r.i != e.id]
         
         r = Record(e.id, e.id, 0, 0)
         RW.append(r)
@@ -179,11 +179,11 @@ def cal_interval_in_days(d1, d2):
     return (d2 - d1).total_seconds() / 3600.0 / 24.0
     # return d2 - d1
 def cal_duij(R, i, j):
-    Rp = filter(lambda r: r.i == i and r.j == j, R)
+    Rp = [r for r in R if r.i == i and r.j == j]
     if len(Rp) == 0:
         return None
-    counts = np.array(map(lambda r:r.c, Rp))
-    intervals = np.array(map(lambda r:r.x, Rp))
+    counts = np.array([r.c for r in Rp])
+    intervals = np.array([r.x for r in Rp])
     return np.sum(intervals / np.log2(2 + counts)) / np.sum(1. / np.log2(2 + counts))
         
 def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2", "PIMF"), is_test=False):
@@ -216,14 +216,14 @@ def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2
                 
     # generate col(event) map
     event_types_map = dict()
-    for i in xrange(len(event_types)):
+    for i in range(len(event_types)):
         event_types_map[event_types[i]] = i
     pickle.dump(event_types_map, open(op.join(base_file_path, 'event_map'), 'w'))  
     
     # generate row map
     row_map = dict()
     row_idx = 0
-    for cid in table.iterkeys():
+    for cid in table.keys():
         row_map[cid] = row_idx
         row_idx += 1
     pickle.dump(row_map, open(op.join(base_file_path, 'user_map'), 'w'))
@@ -231,7 +231,7 @@ def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2
     
     # generate utility matrix
     utility = np.zeros((len(table), len(event_types)))
-    for cid, c_data in table.iteritems():
+    for cid, c_data in table.items():
         events = [e[1] for e in c_data['events']]
         count = Counter(events)
         for k in count:
@@ -246,7 +246,7 @@ def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2
     d = dict()
     total = len(table)
     cur = 0
-    for cid, c_data in table.iteritems():
+    for cid, c_data in table.items():
         R = generate_R(c_data['events'], delta_t)
         events = set([e[1] for e in c_data['events']])
         d[cid] = dict()
@@ -264,15 +264,15 @@ def generate_PIMF_data(data, base_file_path=op.join("..", "..", "output", "data2
     dp = dict()
     cur = 0
     users_count = len(table)
-    for u in table.iterkeys():
-        for i in xrange(len(event_types)):
-            for j in xrange(len(event_types)):
+    for u in table.keys():
+        for i in range(len(event_types)):
+            for j in range(len(event_types)):
                 company = table[u]['company']
-                uijs = filter(lambda x: x[1] == i and x[2] == j, d.keys())
+                uijs = [x for x in list(d.keys()) if x[1] == i and x[2] == j]
                 if len(uijs) != 0:
                     duijs = [d[key] for key in uijs]
                     sim = [2 if company == table[x[0]]['company'] else 1 for x in uijs]
-                    same_company_count = len(filter(lambda x: table[x]['company'] == company, table.keys()))
+                    same_company_count = len([x for x in list(table.keys()) if table[x]['company'] == company])
                     denominator = users_count + same_company_count
                     numerator = np.dot(duijs, sim)
                     if np.isnan(denominator) or np.isnan(numerator) or np.abs(denominator) < 1e-10:
@@ -318,7 +318,7 @@ def generate_PIMF_data2(data, base_file_path=op.join("..", "..", "output", "data
                 
     # generate col(event) map
     event_types_map = dict()
-    for i in xrange(len(event_types)):
+    for i in range(len(event_types)):
         event_types_map[event_types[i]] = i
     pickle.dump(event_types_map, open(op.join(base_file_path, 'event_map'), 'w'))  
     events_count = len(event_types_map)
@@ -326,7 +326,7 @@ def generate_PIMF_data2(data, base_file_path=op.join("..", "..", "output", "data
     # generate row map
     row_map = dict()
     row_idx = 0
-    for cid in table.iterkeys():
+    for cid in table.keys():
         row_map[cid] = row_idx
         row_idx += 1
     pickle.dump(row_map, open(op.join(base_file_path, 'user_map'), 'w'))
@@ -335,7 +335,7 @@ def generate_PIMF_data2(data, base_file_path=op.join("..", "..", "output", "data
     
     # generate utility matrix
     utility = np.zeros((users_count, events_count))
-    for cid, c_data in table.iteritems():
+    for cid, c_data in table.items():
         events = [e[1] for e in c_data['events']]
         count = Counter(events)
         for k in count:
@@ -347,7 +347,7 @@ def generate_PIMF_data2(data, base_file_path=op.join("..", "..", "output", "data
     # d = {(u,i,j):duij}
     d = np.zeros((users_count, events_count, events_count))
     cur = 0
-    for cid, c_data in table.iteritems():
+    for cid, c_data in table.items():
         R = generate_R(c_data['events'], delta_t)
         events = set([e[1] for e in c_data['events']])
         for e in events:
@@ -361,8 +361,8 @@ def generate_PIMF_data2(data, base_file_path=op.join("..", "..", "output", "data
         cur += 1
     
     C = np.zeros((len(row_map), len(row_map)))
-    for u1 in table.iterkeys():
-        for u2 in table.iterkeys():
+    for u1 in table.keys():
+        for u2 in table.keys():
             if table[u1]['company'] == table[u1]['company']:
                 C[row_map[u1], row_map[u2]] = 2
             else:
@@ -386,7 +386,7 @@ def read_in2(source_path=op.join("..", "..", "output", "data2", "original", 'sma
     event_type_column = 2
     with open(source_path) as cf:
         reader = csv.reader(cf, delimiter=',')
-        reader.next()
+        next(reader)
         table = {}
         event_types = []
         date_format = '%Y-%m-%d %H:%M:%S'
@@ -399,11 +399,11 @@ def read_in2(source_path=op.join("..", "..", "output", "data2", "original", 'sma
             if(row[event_type_column] not in event_types):
                 event_types.append(row[event_type_column])
         
-        for v in table.itervalues():
+        for v in table.values():
             v['events'].sort(key=lambda l:l[0])
             
     # print "event_types:#", len(event_types), "\n", event_types
-    return {'event_types':event_types, 'table':table, 'users':table.keys()} 
+    return {'event_types':event_types, 'table':table, 'users':list(table.keys())} 
 if __name__ == '__main__':
 #     d = dict()
 #     d['table'] = {'jkdajfakjsdklfj':{'events':[(1, 'c'), (8, 'd'), (13, 'b'), (16, 'e'), (18, 'b'), (22, 'a')]}}

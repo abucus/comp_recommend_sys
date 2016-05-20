@@ -81,7 +81,7 @@ class Measure:
         if np.all(true_score == 0):
             return None
         
-        pack0 = zip(train_score, true_score)
+        pack0 = list(zip(train_score, true_score))
         pack = [x for x in pack0 if x[1] > 0]
         if len(pack) < self.ndcg_k:
             return None
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     R_hat = np.loadtxt(op.join("..", "..", "output", "data2", "validate", "nmf3", "129", "WH.txt"))
     R_test = np.loadtxt(op.join("..", "..", "output", "data2", "validate", "test", "pure_matrix.csv"), delimiter=',')
     m = Measure(R_hat, R_test)
-    print 'ndcg@{}:{},{}:{},{}:{}'.format(3,m.ndcg(3),5,m.ndcg(5),10,m.ndcg(10))
+    print('ndcg@{}:{},{}:{},{}:{}'.format(3,m.ndcg(3),5,m.ndcg(5),10,m.ndcg(10)))
 #     a = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
 #     print a.shape
 #     print flattern_fpmc_matrix(a)

@@ -17,13 +17,13 @@ class Test(unittest.TestCase):
         for i in range(self.a.shape[1]):
             b = self.a[:, i]
         time_end = datetime.datetime.now()
-        print (time_end - time_start).total_seconds()
+        print((time_end - time_start).total_seconds())
         
         time_start = datetime.datetime.now()
         for i in range(self.a.shape[1]):
             b = self.a.T[i]
         time_end = datetime.datetime.now()
-        print (time_end - time_start).total_seconds()
+        print((time_end - time_start).total_seconds())
 
 
 if __name__ == "__main__":

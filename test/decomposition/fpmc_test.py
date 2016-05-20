@@ -16,9 +16,9 @@ class FPMC_Test(unittest.TestCase):
 # 		np.savetxt(op.join(out_path,'viu'), viu)
 # 		np.savetxt(op.join(out_path,'vil'), vil)
 # 		np.savetxt(op.join(out_path,'vli'), vli)
-		print 'start cal a'
+		print('start cal a')
 		fpmc.cal_a()
-		print 'end cal a'
+		print('end cal a')
 		# pickle.dump(fpmc.a, open(op.join(out_path,'a'), 'w'))
 
 

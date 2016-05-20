@@ -40,14 +40,14 @@ class NMF4(object):
         self.lambda_b = lambda_b
         
         r = int(np.sqrt(V.shape[1]))
-        self.diagnol_col_idxes = [i*r + i for i in xrange(r)]
-        self.non_diagnol_col_idxes = np.setdiff1d(xrange(r**2), self.diagnol_col_idxes)
+        self.diagnol_col_idxes = [i*r + i for i in range(r)]
+        self.non_diagnol_col_idxes = np.setdiff1d(range(r**2), self.diagnol_col_idxes)
 
         W = WInit if WInit is not None else np.random.uniform(1, 2, (V.shape[0], k))
         H = HInit if HInit is not None else np.random.uniform(1, 2, (k, V.shape[1]))
         
         for iter_count in range(max_iter):
-            print "in iter :", iter_count, "time begin", datetime.datetime.now()
+            print("in iter :", iter_count, "time begin", datetime.datetime.now())
             self.computing_W = True
             W = self.__compute_argmin_matrix_for_f_wh(W, H)
             self.computing_W = False
@@ -59,15 +59,15 @@ class NMF4(object):
         Fix W(or H), compute matrix H(or W) which minimize f(W,H) := 1/2 ||V-WH||^2
         '''
         if self.computing_W:
-            print "*** in computing W ***"
+            print("*** in computing W ***")
             X_old = W
         else:
-            print "*** in computing H ***"
+            print("*** in computing H ***")
             X_old = H
         grad_f_old = self.__grad_f(W, H)
         #print "grad_f_old mean:", grad_f_old.mean(), "norm:", norm(grad_f_old)
         f_x_old = self.__f(W, H)
-        print "f(x_old)=", f_x_old
+        print("f(x_old)=", f_x_old)
         alpha = 1
         beta = .1
         X_new = self.__p(X_old - alpha * grad_f_old)
@@ -76,7 +76,7 @@ class NMF4(object):
         
         if f_x_old > self.__f(*((X_new, H) if self.computing_W else (W, X_new))):
             # increase step loop
-            print "*** in increasing loop ***"
+            print("*** in increasing loop ***")
             while True:
                 alpha = alpha / beta
                 X_new_tmp = X_new
@@ -86,20 +86,20 @@ class NMF4(object):
                 need_continue = f_x_old > f_x_new
                 iter_count += 1
                 if not need_continue:
-                    print "alpha:", alpha, " iter_count:", iter_count, \
+                    print("alpha:", alpha, " iter_count:", iter_count, \
                     "\n X_new_mean:", X_new.mean(), ", diff:", norm(X_new - X_old), \
-                    "\n *** exit step increasing loop ***"
+                    "\n *** exit step increasing loop ***")
                     return X_new_tmp
                 elif iter_count == max_iter:
-                    print "alpha:", alpha, " iter_count:", iter_count, \
+                    print("alpha:", alpha, " iter_count:", iter_count, \
                     "\n X_new_mean:", X_new.mean(), ", diff:", norm(X_new - X_old), \
-                    "\n *** exit step increasing loop ***"
+                    "\n *** exit step increasing loop ***")
                     return X_new
                     #break
             #return X_new_tmp
         else:
             # decrease step loop
-            print "*** in decreasing loop ***"
+            print("*** in decreasing loop ***")
             while True:
                 alpha = alpha * beta
                 X_new = self.__p(X_old - alpha * grad_f_old)
@@ -108,12 +108,12 @@ class NMF4(object):
                 need_continue = f_x_old > f_x_new
                 iter_count += 1
                 if need_continue:
-                    print "alpha:", alpha, " iter_count:", iter_count, \
+                    print("alpha:", alpha, " iter_count:", iter_count, \
                     "\nX_new_mean:", X_new.mean(), ", diff:", norm(X_new - X_old), \
-                    "\n*** exit step decreasing loop,"
+                    "\n*** exit step decreasing loop,")
                     return X_new
                 elif iter_count == max_iter:
-                    print " keep ", "W" if self.computing_W else "H", "the same.", "\n*** exit step decreasing loop ***"
+                    print(" keep ", "W" if self.computing_W else "H", "the same.", "\n*** exit step decreasing loop ***")
                     return X_old
         
     def __p(self, x):
@@ -126,7 +126,7 @@ class NMF4(object):
         '''        
         WH_diagnol = np.dot(W,H[:,self.diagnol_col_idxes])
 #         print "WH has 0 values:", np.any(WH_diagnol==0);
-        print "norm W,H,",norm(W),norm(H) 
+        print("norm W,H,",norm(W),norm(H)) 
         return .5 * norm((self.V[:,self.non_diagnol_col_idxes] - np.dot(W, H[:,self.non_diagnol_col_idxes])) * self.I[:,self.non_diagnol_col_idxes]) ** 2 + \
             norm((self.V[:,self.diagnol_col_idxes]*np.log(WH_diagnol)-WH_diagnol)*self.I[:,self.diagnol_col_idxes])**2 + \
             self._lambda * np.dot(np.dot(W.T, self.C), W).trace() + \
@@ -162,6 +162,6 @@ class NMF4(object):
         
 #         print "cal grad time end:", timeend
 #         print "cal grad time cost:", (timeend - timebegin).total_seconds() / 60., " min"
-        print "grad norm", norm(grad)
+        print("grad norm", norm(grad))
         return grad
     

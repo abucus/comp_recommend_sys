@@ -23,7 +23,7 @@ def prepare_general_validation_data():
     test_data = {'event_types':training_data['event_types'], 'table':{}}
     test_table = test_data['table']
     training_table = training_data['table']
-    for k, v in training_table.iteritems():
+    for k, v in training_table.items():
         test_table[k] = {'company':v['company'], 'events':[]}
         total = len(v['events'])
         split_idx = int(total * training_data_ratio)
@@ -51,7 +51,7 @@ def prepare_pimf_validation_data(source_path=op.join("..", "..", "output", "data
     test_data = {'event_types':training_data['event_types'], 'table':{}}
     test_table = test_data['table']
     training_table = training_data['table']
-    for k, v in training_table.iteritems():
+    for k, v in training_table.items():
         test_table[k] = {'company':v['company'], 'events':[]}
         total = len(v['events'])
         split_idx = int(total * training_data_ratio)

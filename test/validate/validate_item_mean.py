@@ -12,8 +12,8 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.input_path = op.join("..", "..", "output", "data", "validate")
-        self.output_path = op.join("..", "..", "output", "data", "validate", "item_mean")
+        self.input_path = op.join("..", "..", "output", "data2", "validate")
+        self.output_path = op.join("..", "..", "output", "data2", "validate", "item_mean")
         if not op.exists(self.output_path):
             os.makedirs(self.output_path)
         self.V = np.loadtxt(op.join(self.input_path, "training", "pure_matrix.csv"), delimiter=",")
@@ -33,12 +33,12 @@ class Test(unittest.TestCase):
 #             abs_sum += v
 #             square_sum += v**2
         if op.exists(op.join(self.output_path, "R_hat.txt")):
-            print "load R_hat"
+            print("load R_hat")
             R_hat = np.loadtxt(op.join(self.output_path, "R_hat.txt"))
         else:
             R_hat = np.zeros(self.V_test.shape)
             for i in range(0, self.V.shape[1]):
-                print "constructing row", i, " starting time", datetime.datetime.now()
+                print("constructing row", i, " starting time", datetime.datetime.now())
                 col = self.V[:, i]
                 if np.any(col != 0):
                     # avg of all row elem or avg of all postive elem

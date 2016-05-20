@@ -8,7 +8,7 @@ def prepare_validation_data(raw_data, out_path, ratio=0.6):
 	test_data = {'event_types':training_data['event_types'], 'table':{}, 'users':training_data['users']}
 	test_table = test_data['table']
 	training_table = training_data['table']
-	for k, v in training_table.iteritems():
+	for k, v in training_table.items():
 	    test_table[k] = {'company':v['company'], 'events':[]}
 	    total = len(v['events'])
 	    split_idx = int(total * ratio)
@@ -40,7 +40,7 @@ def generate_file_for_data(raw_data, out_path):
 	data['u_num'] = len(user_row_maps)
 	data['transactions'] = {}
 
-	for k, v in raw_data['table'].iteritems():
+	for k, v in raw_data['table'].items():
 		events = [event_column_maps[e[1]] for e in v['events']]
 		data['transactions'][user_row_maps[k]] = events
 		update_matrix(events , a[user_row_maps[k]])
@@ -64,7 +64,7 @@ def update_matrix(events, matrix):
 			last_count[p[0]] = 0
 		last_count[p[0]] += 1
 
-	for p, count in pair_count.iteritems():
+	for p, count in pair_count.items():
 		idxes = p.split(seperator)
 		l = int(idxes[0])
 		i = int(idxes[1])

@@ -40,7 +40,7 @@ def cal_events_length():
     # events = []
     time_interval_avg = []
     all_ = []
-    for v in data['table'].values():
+    for v in list(data['table'].values()):
         # events.append(len(v['events']))
         c_intervals = []
         for i in range(1, len(v['events'])):
@@ -58,22 +58,22 @@ def cal_events_length():
         writer = csv.writer(f)
         for row in all_:
             writer.writerow([row])
-    print time_interval_avg
+    print(time_interval_avg)
     with open(op.join("..", "output", "data", "avg_time_interval_mean.txt"), "wb") as f:
         json.dump({'avg_by_user':np.mean(time_interval_avg), 'avg':np.mean(all_)}, f)
 def cal_company_size():
     data = read_in(source_path=op.join("..", "output", "data", "original", 'simpleA2.csv'))
     company = {}
     count = 0
-    for v in data['table'].values(): 
+    for v in list(data['table'].values()): 
         count += 1
         if v['company'] not in company:
             company[v['company']] = 1
         else:
             company[v['company']] += 1
-    cs = company.values()
-    print "mean", np.mean(cs), "max", np.max(cs), "min", np.min(cs), "mid", np.median(cs)
-    print "#people", count, "#company", len(company), "avg", count * 1. / len(company)
+    cs = list(company.values())
+    print("mean", np.mean(cs), "max", np.max(cs), "min", np.min(cs), "mid", np.median(cs))
+    print("#people", count, "#company", len(company), "avg", count * 1. / len(company))
     bins = [i + 0.5 for i in range(10)]
     pt.hist(cs, bins)
     pt.show()

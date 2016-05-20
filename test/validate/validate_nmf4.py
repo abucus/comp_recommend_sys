@@ -43,10 +43,10 @@ for data in ["data2", "data3", "data"]:
                     #np.savetxt(op.join(output_path, "WH"+str(idx)+".txt"), WH)
                     
                     m = Measure(WH, R_test)
-                    precision_recall = zip(*[m.precision_recall(i) for i in [3, 5, 10]])
+                    precision_recall = list(zip(*[m.precision_recall(i) for i in [3, 5, 10]]))
                     result.loc[idx] = [data, _lambda, lambda_a, lambda_b, k, m.ndcg(3), m.ndcg(5), m.ndcg(10)] + list(precision_recall[0]) + list(precision_recall[1])
                     idx += 1
-                    print "###### progress", 100.*idx/total, "% on", data, "#####"
+                    print("###### progress", 100.*idx/total, "% on", data, "#####")
                     del WInit,HInit, W,H,nmf,m
                     result.to_csv(op.join(output_path, "result.csv"), index=False)
                 
