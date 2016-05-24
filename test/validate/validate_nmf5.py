@@ -3,6 +3,9 @@ Created on Dec 25, 2015
 
 @author: tengmf
 '''
+import logging
+logging.disable(logging.CRITICAL)
+
 import numpy as np
 import os
 import os.path as op
@@ -15,12 +18,12 @@ logger = mylog.getLogger('validate_nmf5','DEBUG')
 logger.addHandler(mylog.getLogHandler('INFO', 'CONSOLE'))
 logger.addHandler(mylog.getLogHandler('DEBUG', 'FILE'))
 
-ks = [70]#np.arange(10,70,20)
-_lambdas = [100];#[10 ** i for i in np.arange(-3, 3)]
-sigma_as = [1]#[10 ** i for i in np.arange(-3, 3)]
-sigma_bs = [1,10]#[10 ** i for i in np.arange(-3, 3)]
-etas = [1]#[10 ** i for i in np.arange(-3, 3)]
-thetas = [1]#[10 ** i for i in np.arange(-3, 3)]
+ks = np.arange(10,70,20)
+_lambdas = [10 ** i for i in np.arange(-3, 3)]
+sigma_as = [10 ** i for i in np.arange(-3, 3)]
+sigma_bs = [10 ** i for i in np.arange(-3, 3)]
+etas = [10 ** i for i in np.arange(-3, 3)]
+thetas = [10 ** i for i in np.arange(-3, 3)]
 
 total = len(ks)*len(_lambdas)*len(sigma_as)*len(sigma_bs)*len(etas)*len(thetas)
 
@@ -54,7 +57,9 @@ for data in ["data2"]:#, "data3", "data"]:
                             precision_recall = list(zip(*[m.precision_recall(i) for i in [3, 5, 10]]))
                             result.loc[idx] = [data, _lambda, sigma_a, sigma_b, eta, theta, k, m.ndcg(3), m.ndcg(5), m.ndcg(10)] + list(precision_recall[0]) + list(precision_recall[1])
                             idx += 1
-                            logger.info("###### progress %f on %s #####"%(100.*idx/total, data))
+                            msg = "###### progress %f on %s #####"%(100.*idx/total, data)
+                            logger.info(msg)
+                            print(msg)
                             del W,H,nmf,m
 
         del WInit,HInit
