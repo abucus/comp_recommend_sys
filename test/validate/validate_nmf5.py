@@ -4,7 +4,7 @@ Created on Dec 25, 2015
 @author: tengmf
 '''
 import logging
-logging.disable(logging.CRITICAL)
+#logging.disable(logging.CRITICAL)
 
 import numpy as np
 import os
@@ -18,12 +18,13 @@ logger = mylog.getLogger('validate_nmf5','DEBUG')
 logger.addHandler(mylog.getLogHandler('INFO', 'CONSOLE'))
 logger.addHandler(mylog.getLogHandler('DEBUG', 'FILE'))
 
-ks = np.arange(10,70,20)
-_lambdas = [10 ** i for i in np.arange(-3, 3)]
-sigma_as = [10 ** i for i in np.arange(-3, 3)]
-sigma_bs = [10 ** i for i in np.arange(-3, 3)]
-etas = [10 ** i for i in np.arange(-3, 3)]
-thetas = [10 ** i for i in np.arange(-3, 3)]
+ks = [10]#np.arange(10,70,20)
+_lambdas = [10 ** i for i in np.arange(-5, -2)]
+sigma_as = [1e3]##[10 ** i for i in np.arange(-3, 3)]
+sigma_bs = [1e3]#[10 ** i for i in np.arange(-3, 3)]
+etas = [10]#[10 ** i for i in np.arange(-3, 3)]
+
+thetas = [0.001]##[10 ** i for i in np.arange(-3, 3)]
 
 total = len(ks)*len(_lambdas)*len(sigma_as)*len(sigma_bs)*len(etas)*len(thetas)
 
@@ -41,15 +42,17 @@ for data in ["data2"]:#, "data3", "data"]:
         
     idx = 0;
     for k in ks:
-        WInit = np.random.uniform(1, 2, (V.shape[0], k))
-        HInit = np.random.uniform(1, 2, (k, V.shape[1]))
+        WInit = np.random.uniform(8, 20, (V.shape[0], k))
+        HInit = np.random.uniform(8, 20, (k, V.shape[1]))
 
         for _lambda in _lambdas:
             for sigma_a in sigma_as:
                 for sigma_b in sigma_bs:
                     for eta in etas:
                         for theta in thetas:
-                    
+
+                            
+
                             nmf = NMF5()
                             W, H = nmf.factorize(V, C, k, _lambda, sigma_a, sigma_b, eta, theta, WInit=WInit, HInit=HInit)
                             WH = W.dot(H)                            
@@ -59,9 +62,10 @@ for data in ["data2"]:#, "data3", "data"]:
                             idx += 1
                             msg = "###### progress %f on %s #####"%(100.*idx/total, data)
                             logger.info(msg)
-                            print(msg)
+                            #print(msg)
                             del W,H,nmf,m
+                            #del WInit,HInit
 
-        del WInit,HInit
+        #del WInit,HInit
     result.to_csv(op.join(output_path, "result.csv"), index=False)                      
                 # Measure m = Meas

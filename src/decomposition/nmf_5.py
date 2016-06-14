@@ -77,7 +77,7 @@ class NMF5(object):
         f_x_old = self.__f(W, H)
         self.logger.debug("f(x_old)=%f"%f_x_old)
         alpha = 1
-        beta = .1
+        beta = .5
         X_new = self.__p(X_old - alpha * grad_f_old)
 
         iter_count, max_iter = 0, 5
@@ -90,6 +90,7 @@ class NMF5(object):
                 X_new_tmp = X_new
                 X_new = self.__p(X_old - alpha * grad_f_old)
                 f_x_new = self.__f(*((X_new, H) if self.computing_W else (W, X_new)))
+                self.logger.debug('norm(X_new_tmp):%f, norm(X_new):%f, f_x_new:%f'%(norm(X_new_tmp), norm(X_new), f_x_new))
                 need_continue = f_x_old > f_x_new
                 iter_count += 1
                 if not need_continue:
@@ -100,8 +101,7 @@ class NMF5(object):
                     self.logger.debug("alpha %f iter_count %d X_new_mean %f diff %f \n *** exit step increasing loop ***" \
                     %(alpha, iter_count, X_new.mean(), norm(X_new - X_old)))
                     return X_new
-                    #break
-                    #return X_new_tmp
+
         else:
             # decrease step loop
             self.logger.debug("*** in decreasing loop ***")
@@ -109,6 +109,7 @@ class NMF5(object):
                 alpha = alpha * beta
                 X_new = self.__p(X_old - alpha * grad_f_old)
                 f_x_new = self.__f(*((X_new, H) if self.computing_W else (W, X_new)))
+                self.logger.debug('norm(X_new):%f, f_x_new:%f'%(norm(X_new), f_x_new))
                 iter_count += 1
                 if f_x_old > f_x_new:
                     self.logger.debug("alpha %f iter_count %d X_new_mean %f diff %f \n *** exit step decreasing loop ***" \

@@ -24,7 +24,7 @@ class NMF4(object):
             os.remove(log_path)
         
         
-    def factorize(self, V, C, k=10, _lambda=1, lambda_a=1e-2, lambda_b=1e-2,  max_iter=5, WInit=None, HInit=None):
+    def factorize(self, V, C, k=10, _lambda=1, lambda_a=1e-2, lambda_b=1e-2,  max_iter=1, WInit=None, HInit=None):
         '''
         Factorize a non-negative matrix V(nxm) into the product of W(nxr) and H(rxm) 
         
