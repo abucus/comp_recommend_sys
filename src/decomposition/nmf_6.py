@@ -37,7 +37,7 @@ def _f(W, H, parameters):
     return .5 * norm(
         (P.V[:, P.non_diagnol_col_idxes] - np.dot(W, H[:, P.non_diagnol_col_idxes])) * P.I[:,
                                                                                        P.non_diagnol_col_idxes]) ** 2 / P.sigma ** 2 - np.sum(
-        (P.V[:, P.diagnol_col_idxes] * np.log(WH_diagnol) - WH_diagnol) * P.I[:, P.diagnol_col_idxes]) + norm(
+        -(P.V[:, P.diagnol_col_idxes] * np.log(WH_diagnol) - WH_diagnol) * P.I[:, P.diagnol_col_idxes]) + norm(
         W) ** 2 / P.sigma_a ** 2 + norm(H[:, P.non_diagnol_col_idxes]) ** 2 / P.sigma_b ** 2 - np.sum(
         (P.eta - 1) * np.log(H[:, P.diagnol_col_idxes]) - P.theta * H[:, P.diagnol_col_idxes]) + P.lambda_ * np.dot(
         np.dot(W.T, P.C), W).trace()
@@ -50,7 +50,7 @@ def __grad_f_W(W, H, parameters):
     grad = np.dot(
         (P.V[:, P.non_diagnol_col_idxes] - np.dot(W, H[:, P.non_diagnol_col_idxes])) * P.I[:, P.non_diagnol_col_idxes],
         -H[:, P.non_diagnol_col_idxes].T) / P.sigma ** 2 \
-           + ((P.V[:, P.diagnol_col_idxes] * 1. / WH_diagnol - 1) * P.I[:, P.diagnol_col_idxes]).dot(
+           - ((P.V[:, P.diagnol_col_idxes] * 1. / WH_diagnol - 1) * P.I[:, P.diagnol_col_idxes]).dot(
         H[:, P.diagnol_col_idxes].T) \
            + P.lambda_ * np.dot(P.C + P.C.T, W) \
            + 1 / P.sigma_a ** 2 * W
@@ -62,8 +62,9 @@ def __grad_f_H(W, H, parameters):
     P = parameters
     WH_diagnol = np.dot(W, H[:, P.diagnol_col_idxes])
     grad = np.zeros(H.shape)
-    grad[:, P.diagnol_col_idxes] = W.T.dot((P.V[:, P.diagnol_col_idxes] / WH_diagnol - 1) * P.I[:, P.diagnol_col_idxes]) \
-                                   - np.sum((P.eta - 1) / H[:, P.diagnol_col_idxes] - P.theta)
+    grad[:, P.diagnol_col_idxes] = - W.T.dot(
+        (P.V[:, P.diagnol_col_idxes] / WH_diagnol - 1) * P.I[:, P.diagnol_col_idxes]) \
+                                   - (P.eta - 1) / H[:, P.diagnol_col_idxes] + P.theta
 
     grad[:, P.non_diagnol_col_idxes] = -W.T.dot(
         (P.V[:, P.non_diagnol_col_idxes] - np.dot(W, H[:, P.non_diagnol_col_idxes])) * P.I[:,
@@ -73,7 +74,7 @@ def __grad_f_H(W, H, parameters):
     return grad.reshape(np.product(grad.shape))
 
 
-def nmf6(V, C, k=10, lambda_=1, sigma_a=1e-2, sigma_b=1e-2, eta=1, theta=1, max_iter=2, WInit=None,
+def nmf6(V, C, k=10, lambda_=1, sigma_a=1e-2, sigma_b=1e-2, eta=1, theta=1, max_iter=5, WInit=None,
          HInit=None):
     # initialize
     W = WInit if WInit is not None else np.random.uniform(1, 2, (V.shape[0], k))
@@ -86,8 +87,8 @@ def nmf6(V, C, k=10, lambda_=1, sigma_a=1e-2, sigma_b=1e-2, eta=1, theta=1, max_
     parameters = _P(V, C, k, lambda_, sigma, sigma_a, sigma_b, eta, theta, np.where(V > 0, 1, 0), diagnol_col_idxes,
                     non_diagnol_col_idxes, W.shape, H.shape)
 
-    print('W shape (%d,%d)'%W.shape)
-    print('H shape (%d,%d)'%H.shape)
+    print('W shape (%d,%d)' % W.shape)
+    print('H shape (%d,%d)' % H.shape)
 
     n_W = np.product(W.shape)
     n_H = np.product(H.shape)
@@ -100,18 +101,19 @@ def nmf6(V, C, k=10, lambda_=1, sigma_a=1e-2, sigma_b=1e-2, eta=1, theta=1, max_
         # logger.debug("in iter : %d begin at %r" % (iter_count, datetime.datetime.now()))
         print('*** in iter %d ***' % iter_count)
         result = minimize(lambda X: _f(X, H, parameters), W, jac=lambda X: __grad_f_W(X, H, parameters),
-                          bounds=bounds_W, method='L-BFGS-B')
+                          bounds=bounds_W, method='L-BFGS-B', options={'maxiter': 1000})
         # result = minimize(lambda X: _f(X, H, parameters), W, jac=False,
         #                  bounds=bounds_W, method='L-BFGS-B')
-        W = result.x
+        W_tmp = result.x
         print('solve W : %s %s' % ("OK" if result.success else "Fail", result.message))
 
         result = minimize(lambda X: _f(W, X, parameters), H, jac=lambda X: __grad_f_H(W, X, parameters),
-                          bounds=bounds_H, method='L-BFGS-B')
+                          bounds=bounds_H, method='L-BFGS-B', options={'maxiter': 1000})
         # result = minimize(lambda X: _f(W, X, parameters), H, jac=False,
         #                   bounds=bounds_H, method='L-BFGS-B')
-        H = result.x
+        H_tmp = result.x
         print('solve H : %s %s' % ("OK" if result.success else "Fail", result.message))
+        W, H = W_tmp, H_tmp
     return (W, H)
 
 
