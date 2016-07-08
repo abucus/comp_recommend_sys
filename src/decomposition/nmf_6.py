@@ -94,25 +94,28 @@ def nmf6(V, C, k=10, lambda_=1, sigma_a=1e-2, sigma_b=1e-2, eta=1, theta=1, max_
     n_H = np.product(H.shape)
     W = W.reshape(n_W)
     H = H.reshape(n_H)
-    bounds_W = [(1e-5, None)] * (n_W)
-    bounds_H = [(1e-5, None)] * (n_H)
+    bounds_W = [(1e-5, 9999)] * (n_W)
+    bounds_H = [(1e-5, 9999)] * (n_H)
 
     for iter_count in range(max_iter):
         # logger.debug("in iter : %d begin at %r" % (iter_count, datetime.datetime.now()))
         print('*** in iter %d ***' % iter_count)
-        result = minimize(lambda X: _f(X, H, parameters), W, jac=lambda X: __grad_f_W(X, H, parameters),
-                          bounds=bounds_W, method='L-BFGS-B', options={'maxiter': 1000})
-        # result = minimize(lambda X: _f(X, H, parameters), W, jac=False,
-        #                  bounds=bounds_W, method='L-BFGS-B')
-        W_tmp = result.x
-        print('solve W : %s %s' % ("OK" if result.success else "Fail", result.message))
+        # SLSQP TNC L-BFGS-B
+        # result = minimize(lambda X: _f(X, H, parameters), W, jac=lambda X: __grad_f_W(X, H, parameters),
+        #                   bounds=bounds_W, method='SLSQP', options={'maxiter': 50})
 
+        # L-BFGS-B
+        result = minimize(lambda X: _f(X, H, parameters), W, jac=lambda X: __grad_f_H(W, X, parameters),
+                          bounds=bounds_W, method='L-BFGS-B', options={'maxiter': 50, 'ftol': 1e-4, 'disp': True})
+        W_tmp = result.x
+        print('solve W : %s %s\nF=%f' % ("OK" if result.success else "Fail", result.message, result.fun))
+
+        # result = minimize(lambda X: _f(W, X, parameters), H, jac=lambda X: __grad_f_H(W, X, parameters),
+        #                   bounds=bounds_H, method='SLSQP', options={'maxiter': 50, 'ftol':1e-4})
         result = minimize(lambda X: _f(W, X, parameters), H, jac=lambda X: __grad_f_H(W, X, parameters),
-                          bounds=bounds_H, method='L-BFGS-B', options={'maxiter': 1000})
-        # result = minimize(lambda X: _f(W, X, parameters), H, jac=False,
-        #                   bounds=bounds_H, method='L-BFGS-B')
+                          bounds=bounds_H, method='L-BFGS-B', options={'maxiter': 50, 'ftol': 1e-4, 'disp': True})
         H_tmp = result.x
-        print('solve H : %s %s' % ("OK" if result.success else "Fail", result.message))
+        print('solve H : %s %s\nF=%f' % ("OK" if result.success else "Fail", result.message,result.fun))
         W, H = W_tmp, H_tmp
     return (W, H)
 
