@@ -75,7 +75,7 @@ def __grad_f_H(W, H, parameters):
     return grad.reshape(np.product(grad.shape))
 
 
-def nmf6(V, C, k=10, lambda_=1, sigma_a=1e-2, sigma_b=1e-2, eta=1, theta=1, max_iter=5, WInit=None,
+def nmf6(V, C, k=10, lambda_=1, sigma_a=1e-2, sigma_b=1e-2, eta=1, theta=1, max_iter=1, WInit=None,
          HInit=None):
     # initialize
     W = WInit if WInit is not None else np.random.uniform(1, 2, (V.shape[0], k))
@@ -106,19 +106,19 @@ def nmf6(V, C, k=10, lambda_=1, sigma_a=1e-2, sigma_b=1e-2, eta=1, theta=1, max_
         #                   bounds=bounds_W, method='SLSQP', options={'maxiter': 50})
 
         # L-BFGS-B
-        result = minimize(lambda X: _f(X, H, parameters), W, jac=lambda X: __grad_f_W(X, H, parameters),
+        result1 = minimize(lambda X: _f(X, H, parameters), W, jac=lambda X: __grad_f_W(X, H, parameters),
                           bounds=bounds_W, method='L-BFGS-B', options={'maxiter': 50, 'ftol': 1e-4, 'disp': True})
-        W_tmp = result.x
-        print('solve W : %s %s\nF=%f' % ("OK" if result.success else "Fail", result.message, result.fun))
+        W_tmp = result1.x
+        print('solve W : %s %s\nF=%f' % ("OK" if result1.success else "Fail", result1.message, result1.fun))
 
         # result = minimize(lambda X: _f(W, X, parameters), H, jac=lambda X: __grad_f_H(W, X, parameters),
         #                   bounds=bounds_H, method='SLSQP', options={'maxiter': 50, 'ftol':1e-4})
-        result = minimize(lambda X: _f(W, X, parameters), H, jac=lambda X: __grad_f_H(W, X, parameters),
+        result2 = minimize(lambda X: _f(W, X, parameters), H, jac=lambda X: __grad_f_H(W, X, parameters),
                           bounds=bounds_H, method='L-BFGS-B', options={'maxiter': 50, 'ftol': 1e-4, 'disp': True})
-        H_tmp = result.x
-        print('solve H : %s %s\nF=%f' % ("OK" if result.success else "Fail", result.message, result.fun))
+        H_tmp = result2.x
+        print('solve H : %s %s\nF=%f' % ("OK" if result2.success else "Fail", result2.message, result2.fun))
         W, H = W_tmp, H_tmp
-    return (W, H)
+    return (W, H, result1.success, result2.success)
 
 
 if __name__ == '__main__':
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     thetas = [0.001]  ##[10 ** i for i in np.arange(-3, 3)]
 
     R_test = np.loadtxt(op.join(base_path, data, "validate", "test", "pure_matrix.csv"), delimiter=",")
-    result = DataFrame(columns=["Data Set", "lambda", "sigma A", "sigma B", "eta", "theta", "k"] \
+    result = DataFrame(columns=["Data Set", "lambda", "sigma A", "sigma B", "eta", "theta", "k", "W converge", "H converge"] \
                                + [i + str(j) for i in ["NDCG@", "Precision@", "Recall@"] for j in [3, 5, 10]])
     idx = 0
 
@@ -150,11 +150,11 @@ if __name__ == '__main__':
                     for eta in etas:
                         for theta in thetas:
                             start = time()
-                            W, H = nmf6(V, C, 10, lambda_, sigma_a, sigma_b, eta, theta, WInit=WInit, HInit=HInit)
+                            W, H, W_success, H_success = nmf6(V, C, 10, lambda_, sigma_a, sigma_b, eta, theta, WInit=WInit, HInit=HInit)
                             WH = W.reshape(WInit.shape).dot(H.reshape(HInit.shape))
                             m = Measure(WH, R_test)
                             precision_recall = list(zip(*[m.precision_recall(i) for i in [3, 5, 10]]))
-                            result.loc[idx] = [data, lambda_, sigma_a, sigma_b, eta, theta, k, m.ndcg(3), m.ndcg(5),
+                            result.loc[idx] = [data, lambda_, sigma_a, sigma_b, eta, theta, k, W_success, H_success,m.ndcg(3), m.ndcg(5),
                                                m.ndcg(10)] + list(precision_recall[0]) + list(precision_recall[1])
                             idx += 1
                             print('\n%.2f seconds cost\n' % (time() - start))
