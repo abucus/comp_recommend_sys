@@ -9,8 +9,9 @@ import numpy as np
 from collections import namedtuple
 from scipy.optimize import minimize
 from numpy.linalg import norm
-
-# from sys import exit
+from src.validate.measure import Measure
+from pandas import DataFrame
+from sys import exit
 
 # logger = mylog.getLogger(__name__, 'DEBUG')
 # logger.addHandler(mylog.getLogHandler('INFO', 'CONSOLE'))
@@ -105,7 +106,7 @@ def nmf6(V, C, k=10, lambda_=1, sigma_a=1e-2, sigma_b=1e-2, eta=1, theta=1, max_
         #                   bounds=bounds_W, method='SLSQP', options={'maxiter': 50})
 
         # L-BFGS-B
-        result = minimize(lambda X: _f(X, H, parameters), W, jac=lambda X: __grad_f_H(W, X, parameters),
+        result = minimize(lambda X: _f(X, H, parameters), W, jac=lambda X: __grad_f_W(X, H, parameters),
                           bounds=bounds_W, method='L-BFGS-B', options={'maxiter': 50, 'ftol': 1e-4, 'disp': True})
         W_tmp = result.x
         print('solve W : %s %s\nF=%f' % ("OK" if result.success else "Fail", result.message, result.fun))
@@ -115,7 +116,7 @@ def nmf6(V, C, k=10, lambda_=1, sigma_a=1e-2, sigma_b=1e-2, eta=1, theta=1, max_
         result = minimize(lambda X: _f(W, X, parameters), H, jac=lambda X: __grad_f_H(W, X, parameters),
                           bounds=bounds_H, method='L-BFGS-B', options={'maxiter': 50, 'ftol': 1e-4, 'disp': True})
         H_tmp = result.x
-        print('solve H : %s %s\nF=%f' % ("OK" if result.success else "Fail", result.message,result.fun))
+        print('solve H : %s %s\nF=%f' % ("OK" if result.success else "Fail", result.message, result.fun))
         W, H = W_tmp, H_tmp
     return (W, H)
 
@@ -135,6 +136,11 @@ if __name__ == '__main__':
     etas = [10]  # [10 ** i for i in np.arange(-3, 3)]
     thetas = [0.001]  ##[10 ** i for i in np.arange(-3, 3)]
 
+    R_test = np.loadtxt(op.join(base_path, data, "validate", "test", "pure_matrix.csv"), delimiter=",")
+    result = DataFrame(columns=["Data Set", "lambda", "sigma A", "sigma B", "eta", "theta", "k"] \
+                               + [i + str(j) for i in ["NDCG@", "Precision@", "Recall@"] for j in [3, 5, 10]])
+    idx = 0
+
     for k in ks:
         WInit = np.random.uniform(1, 2, (V.shape[0], k))
         HInit = np.random.uniform(1, 2, (k, V.shape[1]))
@@ -145,6 +151,13 @@ if __name__ == '__main__':
                         for theta in thetas:
                             start = time()
                             W, H = nmf6(V, C, 10, lambda_, sigma_a, sigma_b, eta, theta, WInit=WInit, HInit=HInit)
+                            WH = W.reshape(WInit.shape).dot(H.reshape(HInit.shape))
+                            m = Measure(WH, R_test)
+                            precision_recall = list(zip(*[m.precision_recall(i) for i in [3, 5, 10]]))
+                            result.loc[idx] = [data, lambda_, sigma_a, sigma_b, eta, theta, k, m.ndcg(3), m.ndcg(5),
+                                               m.ndcg(10)] + list(precision_recall[0]) + list(precision_recall[1])
+                            idx += 1
                             print('\n%.2f seconds cost\n' % (time() - start))
                             print('W max %.2f min %.2f norm %.2f' % (W.max(), W.min(), norm(W)))
                             print('H max %.2f min %.2f norm %.2f' % (H.max(), H.min(), norm(H)))
+    result.to_csv('c:/Users/mteng/Desktop/result.csv',index=False)
