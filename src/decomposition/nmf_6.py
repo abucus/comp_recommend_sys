@@ -78,8 +78,8 @@ def __grad_f_H(W, H, parameters):
 def nmf6(V, C, k=10, lambda_=1, sigma_a=1e-2, sigma_b=1e-2, eta=1, theta=1, max_iter=1, WInit=None,
          HInit=None):
     # initialize
-    W = WInit if WInit is not None else np.random.uniform(1, 2, (V.shape[0], k))
-    H = HInit if HInit is not None else np.random.uniform(1, 2, (k, V.shape[1]))
+    W = WInit if WInit is not None else np.random.uniform(1e-3, 1, (V.shape[0], k))
+    H = HInit if HInit is not None else np.random.uniform(1e-3, 1, (k, V.shape[1]))
 
     r = int(np.sqrt(V.shape[1]))
     diagnol_col_idxes = [i * r + i for i in range(r)]
@@ -101,24 +101,22 @@ def nmf6(V, C, k=10, lambda_=1, sigma_a=1e-2, sigma_b=1e-2, eta=1, theta=1, max_
     for iter_count in range(max_iter):
         # logger.debug("in iter : %d begin at %r" % (iter_count, datetime.datetime.now()))
         print('*** in iter %d ***' % iter_count)
-        # SLSQP TNC L-BFGS-B
-        # result = minimize(lambda X: _f(X, H, parameters), W, jac=lambda X: __grad_f_W(X, H, parameters),
-        #                   bounds=bounds_W, method='SLSQP', options={'maxiter': 50})
-
-        # L-BFGS-B
         result1 = minimize(lambda X: _f(X, H, parameters), W, jac=lambda X: __grad_f_W(X, H, parameters),
                           bounds=bounds_W, method='L-BFGS-B', options={'maxiter': 50, 'ftol': 1e-4, 'disp': True})
-        W_tmp = result1.x
+        # result = minimize(lambda X: _f(X, H, parameters), W, jac=False,
+        #                  bounds=bounds_W, method='L-BFGS-B')
+
+        W = result1.x
         print('solve W : %s %s\nF=%f' % ("OK" if result1.success else "Fail", result1.message, result1.fun))
 
-        # result = minimize(lambda X: _f(W, X, parameters), H, jac=lambda X: __grad_f_H(W, X, parameters),
-        #                   bounds=bounds_H, method='SLSQP', options={'maxiter': 50, 'ftol':1e-4})
         result2 = minimize(lambda X: _f(W, X, parameters), H, jac=lambda X: __grad_f_H(W, X, parameters),
                           bounds=bounds_H, method='L-BFGS-B', options={'maxiter': 50, 'ftol': 1e-4, 'disp': True})
-        H_tmp = result2.x
+        H = result2.x
         print('solve H : %s %s\nF=%f' % ("OK" if result2.success else "Fail", result2.message, result2.fun))
-        W, H = W_tmp, H_tmp
-    return (W, H, result1.success, result2.success)
+        #W, H = W, H_tmp
+    #return (W, H, result.fun, norm(result.jac))
+    return list(_reshape(W, H, parameters))+[result1.success, result2.success, result2.fun, norm(result2.jac)]
+
 
 
 if __name__ == '__main__':
@@ -129,18 +127,19 @@ if __name__ == '__main__':
     data = 'data2'
     V = np.loadtxt(op.join(base_path, data, "validate", "training", "pure_matrix.csv"), delimiter=",")
     C = np.loadtxt(op.join(base_path, data, "validate", "training", "company_matrix"))
-    ks = [10]  # np.arange(10,70,20)
-    lambda_s = [10 ** i for i in np.arange(-5, -2)][:1]
-    sigma_as = [1e3]  ##[10 ** i for i in np.arange(-3, 3)]
-    sigma_bs = [1e3]  # [10 ** i for i in np.arange(-3, 3)]
-    etas = [10]  # [10 ** i for i in np.arange(-3, 3)]
-    thetas = [0.001]  ##[10 ** i for i in np.arange(-3, 3)]
+    ks = np.arange(10,60,10)#5
+    lambda_s = [10 ** i for i in np.arange(-5, -2)]#3
+    sigma_as = [10 ** i for i in np.arange(-3, 3)]#6
+    sigma_bs = [10 ** i for i in np.arange(-3, 3)]#6
+    etas = [2 ** i for i in np.arange(0, 6)]#6
+    thetas = [10 ** i for i in np.arange(-3, 3)]#6
 
     R_test = np.loadtxt(op.join(base_path, data, "validate", "test", "pure_matrix.csv"), delimiter=",")
-    result = DataFrame(columns=["Data Set", "lambda", "sigma A", "sigma B", "eta", "theta", "k", "W converge", "H converge"] \
+    result = DataFrame(columns=["Data Set", "lambda", "sigma A", "sigma B", "eta", "theta", "k", "W converge", "H converge", "W Max", "H Max","f", "jac norm"] \
                                + [i + str(j) for i in ["NDCG@", "Precision@", "Recall@"] for j in [3, 5, 10]])
     idx = 0
 
+    start = time()
     for k in ks:
         WInit = np.random.uniform(1, 2, (V.shape[0], k))
         HInit = np.random.uniform(1, 2, (k, V.shape[1]))
@@ -149,15 +148,20 @@ if __name__ == '__main__':
                 for sigma_b in sigma_bs:
                     for eta in etas:
                         for theta in thetas:
-                            start = time()
-                            W, H, W_success, H_success = nmf6(V, C, 10, lambda_, sigma_a, sigma_b, eta, theta, WInit=WInit, HInit=HInit)
-                            WH = W.reshape(WInit.shape).dot(H.reshape(HInit.shape))
+                            
+                            W, H, W_success, H_success,obj_val,jac_norm = nmf6(V, C, 10, lambda_, sigma_a, sigma_b, eta, theta, WInit=WInit, HInit=HInit)
+
+                            WH = W.dot(H)
                             m = Measure(WH, R_test)
                             precision_recall = list(zip(*[m.precision_recall(i) for i in [3, 5, 10]]))
-                            result.loc[idx] = [data, lambda_, sigma_a, sigma_b, eta, theta, k, W_success, H_success,m.ndcg(3), m.ndcg(5),
+                            result.loc[idx] = [data, lambda_, sigma_a, sigma_b, eta, theta, k, W_success, H_success, W.max(), H.max(), obj_val, jac_norm,m.ndcg(3), m.ndcg(5),
                                                m.ndcg(10)] + list(precision_recall[0]) + list(precision_recall[1])
-                            idx += 1
-                            print('\n%.2f seconds cost\n' % (time() - start))
-                            print('W max %.2f min %.2f norm %.2f' % (W.max(), W.min(), norm(W)))
+                            
+                            
+                            print('W max %.2f min   %.2f norm %.2f' % (W.max(), W.min(), norm(W)))
                             print('H max %.2f min %.2f norm %.2f' % (H.max(), H.min(), norm(H)))
-    result.to_csv('c:/Users/mteng/Desktop/result.csv',index=False)
+                            np.save('comp_recommend_sys/output/nmf6measure/W%d'%idx,W)
+                            np.save('comp_recommend_sys/output/nmf6measure/H%d'%idx,H)                                
+                            idx += 1
+                            result.to_csv('comp_recommend_sys/output/nmf6measure/nmf_measure_result.csv')
+    print('\n%.2f seconds cost\n' % (time() - start))
